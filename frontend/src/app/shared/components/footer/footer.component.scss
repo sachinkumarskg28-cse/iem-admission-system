@@ -1,0 +1,150 @@
+.iem-footer {
+  background-color: #081a2b;
+  color: #94a3b8;
+  padding: 60px 0 20px;
+  border-top: 1px solid #1e293b;
+  margin-top: 60px;
+}
+
+.footer-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1.5fr;
+  gap: 40px;
+  margin-bottom: 40px;
+}
+
+.footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+
+  .logo-box {
+    background: #0284c7;
+    color: white;
+    font-weight: 800;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 1rem;
+  }
+
+  h3 {
+    color: #ffffff;
+    font-size: 1.1rem;
+    line-height: 1.2;
+  }
+}
+
+.institute-desc {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.accreditation-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  .tag {
+    background-color: rgba(212, 175, 55, 0.15);
+    color: #d4af37;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    padding: 4px 10px;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+}
+
+.footer-col {
+  h4 {
+    color: #ffffff;
+    font-size: 1rem;
+    margin-bottom: 18px;
+    position: relative;
+    padding-bottom: 8px;
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 30px;
+      height: 2px;
+      background-color: #d4af37;
+    }
+  }
+
+  ul {
+    list-style: none;
+
+    li {
+      margin-bottom: 10px;
+      font-size: 0.875rem;
+
+      a {
+        color: #94a3b8;
+        text-decoration: none;
+        transition: color 0.2s;
+
+        &:hover {
+          color: #ffffff;
+        }
+      }
+    }
+  }
+
+  .contact-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+
+    .material-icons {
+      font-size: 1.1rem;
+      color: #0284c7;
+      margin-top: 2px;
+    }
+  }
+}
+
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 20px;
+  border-top: 1px solid #1e293b;
+  font-size: 0.8rem;
+
+  .footer-links {
+    display: flex;
+    gap: 16px;
+
+    a {
+      color: #94a3b8;
+      text-decoration: none;
+      &:hover {
+        color: #ffffff;
+      }
+    }
+  }
+}
+
+@media (max-width: 860px) {
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+}

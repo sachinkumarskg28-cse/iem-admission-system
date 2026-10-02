@@ -1,0 +1,85 @@
+<div class="track-page container">
+  <div class="track-header">
+    <div class="header-tag">ONLINE SCRUTINY TRACKER</div>
+    <h2>Track Admission Application Status</h2>
+    <p>Check the real-time progress and scrutiny remarks for your IEM Kolkata admission form.</p>
+
+    <!-- Search Form -->
+    <div class="search-box">
+      <div class="search-input-group">
+        <span class="material-icons">search</span>
+        <input
+          type="text"
+          [(ngModel)]="applicationNumber"
+          placeholder="Enter Application No. (e.g. IEM-2026-881023)"
+          (keyup.enter)="onSearch()"
+        />
+        <button class="btn btn-primary" (click)="onSearch()" [disabled]="isLoading">
+          <span *ngIf="!isLoading">Search</span>
+          <span *ngIf="isLoading">Searching...</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="alert alert-danger track-alert">
+    <span class="material-icons">error</span> {{ errorMessage }}
+  </div>
+
+  <!-- Search Result Details Card -->
+  <div *ngIf="application" class="result-card card">
+    <div class="result-header">
+      <div>
+        <span class="app-num-label">APPLICATION NUMBER</span>
+        <h3>{{ application.applicationNumber }}</h3>
+      </div>
+      <app-status-badge [status]="application.status"></app-status-badge>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-item">
+        <span class="label">Course Program:</span>
+        <span class="value">{{ application.course?.name || 'N/A' }} ({{ application.course?.courseCode }})</span>
+      </div>
+      <div class="info-item">
+        <span class="label">Department:</span>
+        <span class="value">{{ application.course?.department || 'N/A' }}</span>
+      </div>
+      <div class="info-item">
+        <span class="label">Submission Date:</span>
+        <span class="value">{{ application.submissionDate ? (application.submissionDate | date:'mediumDate') : 'Draft' }}</span>
+      </div>
+      <div class="info-item">
+        <span class="label">Decision Date:</span>
+        <span class="value">{{ application.decisionDate ? (application.decisionDate | date:'mediumDate') : 'Pending Committee Review' }}</span>
+      </div>
+    </div>
+
+    <!-- Officer Remarks Notice -->
+    <div *ngIf="application.officerRemarks" class="remarks-box">
+      <span class="material-icons">rate_review</span>
+      <div>
+        <strong>Admission Officer Remarks:</strong>
+        <p>{{ application.officerRemarks }}</p>
+      </div>
+    </div>
+
+    <!-- Application Timeline -->
+    <div class="timeline-section" *ngIf="application.timeline && application.timeline.length > 0">
+      <h4>Application Lifecycle Progress</h4>
+      <div class="timeline-list">
+        <div class="timeline-item" *ngFor="let item of application.timeline; let last = last" [class.latest]="last">
+          <div class="timeline-marker">
+            <span class="material-icons">{{ item.status === 'APPROVED' ? 'check_circle' : 'radio_button_checked' }}</span>
+          </div>
+          <div class="timeline-content">
+            <div class="t-status">{{ item.status.replace('_', ' ') }}</div>
+            <div class="t-comment">{{ item.comment }}</div>
+            <div class="t-meta">Updated by {{ item.actorName }} ({{ item.role }}) &bull; {{ item.timestamp | date:'medium' }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

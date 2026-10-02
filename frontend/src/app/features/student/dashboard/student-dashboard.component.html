@@ -1,0 +1,125 @@
+<div class="dashboard-page container">
+  <!-- Welcome Banner -->
+  <div class="welcome-banner card">
+    <div class="banner-text">
+      <div class="user-greeting">APPLICANT PORTAL</div>
+      <h2>Welcome back, {{ authService.currentUserValue?.name }}!</h2>
+      <p>Student ID: <strong>{{ summaryData?.student?.studentId || 'IEM-STD-2026' }}</strong> &bull; Session: <strong>2026 - 2027</strong></p>
+    </div>
+    <div class="banner-cta">
+      <a routerLink="/student/apply" class="btn btn-secondary">
+        <span class="material-icons">add_circle</span> Apply for Course
+      </a>
+      <a routerLink="/student/profile" class="btn btn-outline">
+        <span class="material-icons">edit</span> Edit Profile
+      </a>
+    </div>
+  </div>
+
+  <!-- Profile Completion Tracker -->
+  <div class="profile-meter-card card">
+    <div class="meter-header">
+      <div>
+        <h4>Profile Completeness</h4>
+        <p>Complete 100% of your academic and address details for faster application approval.</p>
+      </div>
+      <div class="meter-percent">{{ summaryData?.stats?.profileCompletion || 20 }}%</div>
+    </div>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" [style.width.%]="summaryData?.stats?.profileCompletion || 20"></div>
+    </div>
+  </div>
+
+  <!-- KPI Stats Grid -->
+  <div class="kpi-grid">
+    <div class="kpi-card card">
+      <div class="kpi-icon blue"><span class="material-icons">description</span></div>
+      <div class="kpi-info">
+        <div class="kpi-val">{{ summaryData?.stats?.totalApplications || 0 }}</div>
+        <div class="kpi-title">Total Applications</div>
+      </div>
+    </div>
+
+    <div class="kpi-card card">
+      <div class="kpi-icon green"><span class="material-icons">verified</span></div>
+      <div class="kpi-info">
+        <div class="kpi-val">{{ summaryData?.stats?.approvedApplications || 0 }}</div>
+        <div class="kpi-title">Approved / Admitted</div>
+      </div>
+    </div>
+
+    <div class="kpi-card card">
+      <div class="kpi-icon amber"><span class="material-icons">pending_actions</span></div>
+      <div class="kpi-info">
+        <div class="kpi-val">{{ summaryData?.stats?.underReviewApplications || 0 }}</div>
+        <div class="kpi-title">Under Scrutiny</div>
+      </div>
+    </div>
+
+    <div class="kpi-card card">
+      <div class="kpi-icon purple"><span class="material-icons">folder</span></div>
+      <div class="kpi-info">
+        <div class="kpi-val">{{ summaryData?.stats?.verifiedDocumentsCount || 0 }} / {{ summaryData?.stats?.totalDocumentsUploaded || 0 }}</div>
+        <div class="kpi-title">Verified Documents</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Applications Section -->
+  <div class="applications-section">
+    <div class="section-title-row">
+      <h3>Your Admission Applications</h3>
+      <a routerLink="/student/apply" class="btn btn-primary btn-sm">
+        <span class="material-icons">add</span> New Application
+      </a>
+    </div>
+
+    <div *ngIf="applications.length === 0 && !isLoading" class="empty-state card">
+      <span class="material-icons empty-icon">assignment_late</span>
+      <h4>No Applications Submitted Yet</h4>
+      <p>Start your journey at IEM Kolkata by choosing a degree program.</p>
+      <a routerLink="/student/apply" class="btn btn-primary">Start Application Wizard</a>
+    </div>
+
+    <div class="applications-grid" *ngIf="applications.length > 0">
+      <div class="app-card card" *ngFor="let app of applications">
+        <div class="app-card-top">
+          <div>
+            <span class="app-no">{{ app.applicationNumber }}</span>
+            <h4>{{ app.course?.name }} ({{ app.course?.courseCode }})</h4>
+            <p class="app-dept">{{ app.course?.department }}</p>
+          </div>
+          <app-status-badge [status]="app.status"></app-status-badge>
+        </div>
+
+        <div class="app-card-details">
+          <div class="app-detail-item">
+            <span class="label">Fee Payment:</span>
+            <span class="val" [class.paid]="app.isFeePaid">
+              {{ app.isFeePaid ? '₹2,000 Paid (Confirmed)' : 'Payment Pending' }}
+            </span>
+          </div>
+          <div class="app-detail-item">
+            <span class="label">Submission Date:</span>
+            <span class="val">{{ app.submissionDate ? (app.submissionDate | date:'mediumDate') : 'Draft' }}</span>
+          </div>
+        </div>
+
+        <!-- Officer Remarks if any -->
+        <div *ngIf="app.officerRemarks" class="app-remarks">
+          <span class="material-icons">feedback</span>
+          <p>{{ app.officerRemarks }}</p>
+        </div>
+
+        <div class="app-card-actions">
+          <a [routerLink]="['/student/applications', app._id]" class="btn btn-outline btn-sm">
+            <span class="material-icons">visibility</span> View Timeline
+          </a>
+          <button class="btn btn-secondary btn-sm" (click)="downloadPDF(app._id, app.applicationNumber)">
+            <span class="material-icons">download</span> Download PDF Form
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,172 @@
+<div class="home-page">
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="material-icons">verified</span> Admissions Open 2026 - 2027
+      </div>
+      <h1 class="hero-title">
+        Institute of Engineering & Management <span class="highlight">(IEM)</span>
+      </h1>
+      <p class="hero-subtitle">
+        Shape your future at Kolkata's top-ranked engineering & management institute. Apply online for B.Tech, BCA, MCA, BBA, and MBA programs with seamless digital document verification.
+      </p>
+
+      <div class="hero-actions">
+        <a routerLink="/auth/register" class="btn btn-secondary btn-lg">
+          <span class="material-icons">app_registration</span> Apply Online Now
+        </a>
+        <a href="#programs" class="btn btn-outline btn-lg hero-outline">
+          <span class="material-icons">menu_book</span> Explore Programs
+        </a>
+      </div>
+
+      <!-- Quick Track Bar -->
+      <div class="track-bar-box">
+        <div class="track-input-group">
+          <span class="material-icons">search</span>
+          <input
+            type="text"
+            [(ngModel)]="trackNumber"
+            placeholder="Enter Application Number (e.g. IEM-2026-881023)..."
+            (keyup.enter)="trackApplication()"
+          />
+          <button class="btn btn-primary" (click)="trackApplication()">Track Status</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Key Highlights Banner -->
+  <section class="highlights-section container">
+    <div class="highlight-card">
+      <div class="hl-icon"><span class="material-icons">military_tech</span></div>
+      <div class="hl-text">
+        <h4>NAAC 'A' Grade</h4>
+        <p>Highest quality academic standards & faculty</p>
+      </div>
+    </div>
+    <div class="highlight-card">
+      <div class="hl-icon"><span class="material-icons">work</span></div>
+      <div class="hl-text">
+        <h4>100% Placement Record</h4>
+        <p>Top recruiters: Google, Microsoft, TCS, Cognizant</p>
+      </div>
+    </div>
+    <div class="highlight-card">
+      <div class="hl-icon"><span class="material-icons">account_balance</span></div>
+      <div class="hl-text">
+        <h4>Autonomous Institute</h4>
+        <p>Affiliated to MAKAUT & Approved by AICTE</p>
+      </div>
+    </div>
+    <div class="highlight-card">
+      <div class="hl-icon"><span class="material-icons">public</span></div>
+      <div class="hl-text">
+        <h4>Salt Lake Sector V</h4>
+        <p>Located in the heart of Kolkata's Tech Hub</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Programs & Courses Section -->
+  <section id="programs" class="programs-section container">
+    <div class="section-header">
+      <div class="section-tag">DEGREE OFFERINGS</div>
+      <h2>Explore Academic Programs</h2>
+      <p>Select your program of interest to view seat availability, eligibility criteria, and fee structure.</p>
+    </div>
+
+    <!-- Department Filters -->
+    <div class="dept-filters">
+      <button
+        class="filter-pill"
+        [class.active]="selectedDepartment === ''"
+        (click)="filterByDepartment('')"
+      >
+        All Programs
+      </button>
+      <button
+        *ngFor="let dept of departments"
+        class="filter-pill"
+        [class.active]="selectedDepartment === dept"
+        (click)="filterByDepartment(dept)"
+      >
+        {{ dept.replace('Department of ', '').replace('School of ', '') }}
+      </button>
+    </div>
+
+    <!-- Courses Grid -->
+    <div class="courses-grid" *ngIf="!isLoading">
+      <div class="course-card" *ngFor="let course of courses">
+        <div class="course-header">
+          <span class="course-code">{{ course.courseCode }}</span>
+          <span class="course-level">{{ course.level }}</span>
+        </div>
+        <h3 class="course-title">{{ course.name }}</h3>
+        <p class="course-dept">{{ course.department }}</p>
+
+        <div class="course-details">
+          <div class="detail-row">
+            <span class="material-icons">schedule</span>
+            <span>Duration: <strong>{{ course.duration }}</strong></span>
+          </div>
+          <div class="detail-row">
+            <span class="material-icons">event_seat</span>
+            <span>Available Seats: <strong class="seat-count">{{ course.availableSeats }} / {{ course.totalSeats }}</strong></span>
+          </div>
+          <div class="detail-row">
+            <span class="material-icons">payments</span>
+            <span>Total Fee: <strong>₹ {{ course.feesStructure.totalCourseFee | number }}</strong></span>
+          </div>
+        </div>
+
+        <div class="eligibility-box">
+          <strong>Eligibility:</strong> {{ course.eligibilityCriteria }}
+        </div>
+
+        <div class="course-footer">
+          <button class="btn btn-primary btn-block" (click)="applyForCourse(course)">
+            Apply for {{ course.courseCode }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loader -->
+    <div class="loading-state" *ngIf="isLoading">
+      <p>Loading course catalog...</p>
+    </div>
+  </section>
+
+  <!-- Admission Steps Flow -->
+  <section class="steps-section container">
+    <div class="section-header">
+      <div class="section-tag">HOW IT WORKS</div>
+      <h2>Simple 4-Step Online Admission</h2>
+    </div>
+
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-number">1</div>
+        <h4>Register & Profile</h4>
+        <p>Create your student account and fill in your academic scores (10th, 12th, and entrance exam ranks).</p>
+      </div>
+      <div class="step-card">
+        <div class="step-number">2</div>
+        <h4>Upload Documents</h4>
+        <p>Upload digital copies of your photo, signature, marksheets, and scorecards for instant scrutiny.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-number">3</div>
+        <h4>Pay Application Fee</h4>
+        <p>Complete the mock ₹2,000 application fee transaction via UPI / Net Banking & receive your receipt.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-number">4</div>
+        <h4>Verification & Offer</h4>
+        <p>Admissions Committee verifies records and issues your official Admission Offer Letter.</p>
+      </div>
+    </div>
+  </section>
+</div>

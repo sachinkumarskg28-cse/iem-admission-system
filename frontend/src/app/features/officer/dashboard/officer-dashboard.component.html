@@ -1,0 +1,179 @@
+<div class="officer-page container">
+  <div class="page-header card">
+    <div>
+      <div class="header-tag">ADMISSION COMMITTEE DESK</div>
+      <h2>Application Scrutiny & Verification Queue</h2>
+      <p>Review applicant academic credentials, verify uploaded certificates, and grant admission approvals.</p>
+    </div>
+    <div class="queue-stat">
+      <span class="count">{{ totalCount }}</span>
+      <span class="lbl">Applications in Queue</span>
+    </div>
+  </div>
+
+  <!-- Filters Bar -->
+  <div class="filters-bar card">
+    <div class="filter-group search">
+      <span class="material-icons">search</span>
+      <input
+        type="text"
+        [(ngModel)]="searchQuery"
+        placeholder="Search applicant name, email, or application number..."
+        (input)="onFilterChange()"
+      />
+    </div>
+
+    <div class="filter-group">
+      <label>Status</label>
+      <select [(ngModel)]="statusFilter" (change)="onFilterChange()">
+        <option value="">All Statuses</option>
+        <option value="SUBMITTED">SUBMITTED</option>
+        <option value="UNDER_REVIEW">UNDER REVIEW</option>
+        <option value="DOCUMENTS_VERIFIED">DOCUMENTS VERIFIED</option>
+        <option value="APPROVED">APPROVED</option>
+        <option value="REJECTED">REJECTED</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Program / Course</label>
+      <select [(ngModel)]="courseFilter" (change)="onFilterChange()">
+        <option value="">All Courses</option>
+        <option *ngFor="let c of courses" [value]="c._id">{{ c.courseCode }} - {{ c.name }}</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Applications Table -->
+  <div class="table-card card">
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>App Number</th>
+            <th>Applicant Name</th>
+            <th>Program Applied</th>
+            <th>Merit / PCM %</th>
+            <th>Fee Paid</th>
+            <th>Status</th>
+            <th>Submission Date</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let app of applications">
+            <td><strong>{{ app.applicationNumber }}</strong></td>
+            <td>
+              <div class="applicant-cell">
+                <span class="a-name">{{ app.user?.name }}</span>
+                <span class="a-email">{{ app.user?.email }}</span>
+              </div>
+            </td>
+            <td>
+              <span class="course-pill">{{ app.course?.courseCode }}</span>
+            </td>
+            <td>
+              <strong>{{ app.meritScore || app.student?.academics?.class12?.pcmPercentage || '88' }}%</strong>
+            </td>
+            <td>
+              <span class="badge" [class.badge-approved]="app.isFeePaid" [class.badge-rejected]="!app.isFeePaid">
+                {{ app.isFeePaid ? 'Paid' : 'Pending' }}
+              </span>
+            </td>
+            <td>
+              <app-status-badge [status]="app.status"></app-status-badge>
+            </td>
+            <td>{{ app.submissionDate | date:'shortDate' }}</td>
+            <td>
+              <button class="btn btn-primary btn-sm" (click)="openReviewModal(app)">
+                <span class="material-icons">rate_review</span> Review
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="applications.length === 0 && !isLoading">
+            <td colspan="8" class="text-center" style="padding: 40px;">No applications found matching current criteria.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Scrutiny / Review Modal -->
+  <div class="modal-backdrop" *ngIf="isModalOpen">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <h3>Review Application: {{ selectedApp?.applicationNumber }}</h3>
+          <p>{{ selectedApp?.course?.name }} ({{ selectedApp?.course?.courseCode }})</p>
+        </div>
+        <button class="icon-btn close-btn" (click)="closeModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Applicant & Academic Details Grid -->
+        <div class="details-section">
+          <h4>1. Applicant Information & Academic Scores</h4>
+          <div class="info-grid">
+            <div><span class="lbl">Name:</span> <strong>{{ selectedApp?.user?.name }}</strong></div>
+            <div><span class="lbl">Email:</span> <strong>{{ selectedApp?.user?.email }}</strong></div>
+            <div><span class="lbl">Contact:</span> <strong>{{ selectedApp?.user?.phone || 'N/A' }}</strong></div>
+            <div><span class="lbl">Category:</span> <strong>{{ selectedApp?.student?.category || 'General' }}</strong></div>
+            <div><span class="lbl">Class X %:</span> <strong>{{ selectedApp?.student?.academics?.class10?.percentage || 88 }}%</strong></div>
+            <div><span class="lbl">Class XII PCM %:</span> <strong>{{ selectedApp?.student?.academics?.class12?.pcmPercentage || 91 }}%</strong></div>
+            <div><span class="lbl">Entrance Exam:</span> <strong>{{ selectedApp?.student?.academics?.entranceExam?.examType || 'WBJEE' }} (Rank: {{ selectedApp?.student?.academics?.entranceExam?.rank || '2150' }})</strong></div>
+            <div><span class="lbl">Seats Available:</span> <strong>{{ selectedApp?.course?.availableSeats }} seats</strong></div>
+          </div>
+        </div>
+
+        <!-- Document Verification Checklist -->
+        <div class="details-section">
+          <h4>2. Uploaded Certificates & Document Verification</h4>
+          <div class="doc-verification-list">
+            <div class="v-doc-item" *ngFor="let doc of appDocuments">
+              <div class="v-doc-info">
+                <span class="material-icons">description</span>
+                <div>
+                  <h5>{{ doc.title || doc.documentType }}</h5>
+                  <span class="file-link">{{ doc.originalFileName }}</span>
+                  <div *ngIf="doc.verificationRemarks" class="doc-note">
+                    Note: {{ doc.verificationRemarks }}
+                  </div>
+                </div>
+              </div>
+              <div class="v-doc-actions">
+                <span class="badge" [class.badge-approved]="doc.status === 'VERIFIED'" [class.badge-rejected]="doc.status === 'REJECTED'">
+                  {{ doc.status }}
+                </span>
+                <button class="btn btn-success btn-sm" (click)="verifyDoc(doc._id, 'VERIFIED')">Verify</button>
+                <button class="btn btn-danger btn-sm" (click)="verifyDoc(doc._id, 'REJECTED')">Reject</button>
+              </div>
+            </div>
+            <div *ngIf="appDocuments.length === 0" class="no-docs-text">
+              No documents uploaded yet.
+            </div>
+          </div>
+        </div>
+
+        <!-- Officer Remarks & Decision -->
+        <div class="details-section">
+          <h4>3. Officer Decision & Committee Remarks</h4>
+          <div class="form-group">
+            <label>Scrutiny Notes / Remarks</label>
+            <textarea [(ngModel)]="officerRemarks" rows="3" placeholder="Enter remarks (e.g. Verified with WBJEE portal, PCM cutoff satisfied)..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Rejection Reason (if rejecting)</label>
+            <input type="text" [(ngModel)]="rejectionReason" placeholder="e.g. Minimum 60% PCM criteria not met" />
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-outline" (click)="closeModal()">Cancel</button>
+        <button class="btn btn-warning" (click)="changeAppStatus('UNDER_REVIEW')">Put Under Review</button>
+        <button class="btn btn-danger" (click)="changeAppStatus('REJECTED')">Reject Application</button>
+        <button class="btn btn-success" (click)="changeAppStatus('APPROVED')">Approve & Issue Offer Letter</button>
+      </div>
+    </div>
+  </div>
+</div>

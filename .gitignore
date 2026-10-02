@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Environment variables
+.env
+*/.env
+.env.local
+.env.*.local
+
+# Build outputs & artifacts
+dist/
+build/
+.angular/
+.angular/*
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
+*.log
+
+# Temporary / uploads (exclude actual uploaded user files, keep placeholder)
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# OS / Editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.sublime-workspace
+*.swp

@@ -1,0 +1,348 @@
+<div class="wizard-page container">
+  <!-- Stepper Navigation Bar -->
+  <div class="stepper-bar card">
+    <div class="step-node" [class.active]="currentStep === 1" [class.completed]="currentStep > 1">
+      <div class="step-circle">1</div>
+      <div class="step-label">Select Course</div>
+    </div>
+    <div class="step-line" [class.filled]="currentStep > 1"></div>
+
+    <div class="step-node" [class.active]="currentStep === 2" [class.completed]="currentStep > 2">
+      <div class="step-circle">2</div>
+      <div class="step-label">Personal Info</div>
+    </div>
+    <div class="step-line" [class.filled]="currentStep > 2"></div>
+
+    <div class="step-node" [class.active]="currentStep === 3" [class.completed]="currentStep > 3">
+      <div class="step-circle">3</div>
+      <div class="step-label">Academics</div>
+    </div>
+    <div class="step-line" [class.filled]="currentStep > 3"></div>
+
+    <div class="step-node" [class.active]="currentStep === 4" [class.completed]="currentStep > 4">
+      <div class="step-circle">4</div>
+      <div class="step-label">Documents</div>
+    </div>
+    <div class="step-line" [class.filled]="currentStep > 4"></div>
+
+    <div class="step-node" [class.active]="currentStep === 5" [class.completed]="currentStep > 5">
+      <div class="step-circle">5</div>
+      <div class="step-label">Review & Declare</div>
+    </div>
+    <div class="step-line" [class.filled]="currentStep > 5"></div>
+
+    <div class="step-node" [class.active]="currentStep === 6" [class.completed]="paymentSuccess">
+      <div class="step-circle">6</div>
+      <div class="step-label">Fee Payment</div>
+    </div>
+  </div>
+
+  <!-- Step Content Container -->
+  <div class="wizard-body card" *ngIf="!isLoading">
+
+    <!-- STEP 1: Course Selection -->
+    <div *ngIf="currentStep === 1" class="step-container">
+      <div class="step-header">
+        <h3>Step 1: Choose Your Degree Program</h3>
+        <p>Select the degree course you wish to apply for in Academic Year 2026-2027.</p>
+      </div>
+
+      <div class="courses-selector-grid">
+        <div
+          class="course-select-card"
+          *ngFor="let course of courses"
+          [class.selected]="selectedCourse?._id === course._id"
+          (click)="selectCourse(course)"
+        >
+          <div class="card-radio">
+            <span class="material-icons">{{ selectedCourse?._id === course._id ? 'radio_button_checked' : 'radio_button_unchecked' }}</span>
+          </div>
+          <div class="card-body">
+            <div class="code-badge">{{ course.courseCode }}</div>
+            <h4>{{ course.name }}</h4>
+            <p class="dept-text">{{ course.department }}</p>
+            <div class="meta-row">
+              <span>Duration: <strong>{{ course.duration }}</strong></span>
+              <span>Available Seats: <strong class="seat-badge">{{ course.availableSeats }}</strong></span>
+            </div>
+            <div class="fee-row">
+              <span>Total Program Fee: <strong>₹ {{ course.feesStructure.totalCourseFee | number }}</strong></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="wizard-footer">
+        <button class="btn btn-primary" (click)="goToStep(2)" [disabled]="!selectedCourse || isSaving">
+          <span>Continue to Personal Details &rarr;</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 2: Personal Details Review -->
+    <div *ngIf="currentStep === 2" class="step-container">
+      <div class="step-header">
+        <h3>Step 2: Confirm Personal & Guardian Details</h3>
+        <p>Review the personal information loaded from your profile.</p>
+      </div>
+
+      <div class="review-box">
+        <div class="review-grid">
+          <div><span class="lbl">Applicant Full Name:</span> <strong>{{ authService.currentUserValue?.name }}</strong></div>
+          <div><span class="lbl">Registered Email:</span> <strong>{{ authService.currentUserValue?.email }}</strong></div>
+          <div><span class="lbl">Mobile Number:</span> <strong>{{ authService.currentUserValue?.phone || 'N/A' }}</strong></div>
+          <div><span class="lbl">Gender & Category:</span> <strong>{{ studentProfile?.gender || 'Male' }} ({{ studentProfile?.category || 'General' }})</strong></div>
+          <div><span class="lbl">Father's Name:</span> <strong>{{ studentProfile?.guardian?.fatherName || 'N/A' }}</strong></div>
+          <div><span class="lbl">Present City & State:</span> <strong>{{ studentProfile?.address?.present?.city || 'Kolkata' }}, {{ studentProfile?.address?.present?.state || 'West Bengal' }}</strong></div>
+        </div>
+        <p class="edit-hint">Need to change details? <a routerLink="/student/profile" target="_blank">Edit Profile in new tab &rarr;</a></p>
+      </div>
+
+      <div class="wizard-footer">
+        <button class="btn btn-outline" (click)="goToStep(1)">&larr; Back</button>
+        <button class="btn btn-primary" (click)="goToStep(3)">Continue to Academic Details &rarr;</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: Academic Qualifications -->
+    <div *ngIf="currentStep === 3" class="step-container">
+      <div class="step-header">
+        <h3>Step 3: Academic & Entrance Exam Scores</h3>
+        <p>Confirm the academic qualifications relevant for admission merit calculation.</p>
+      </div>
+
+      <div class="academics-summary">
+        <div class="acad-card">
+          <h4>Class X Secondary Qualifications</h4>
+          <p>Board: <strong>{{ studentProfile?.academics?.class10?.board || 'CBSE' }}</strong></p>
+          <p>Passing Year: <strong>{{ studentProfile?.academics?.class10?.passingYear || 2022 }}</strong></p>
+          <p>Percentage: <strong>{{ studentProfile?.academics?.class10?.percentage || 85 }}%</strong></p>
+        </div>
+
+        <div class="acad-card">
+          <h4>Class XII Higher Secondary Qualifications</h4>
+          <p>Board: <strong>{{ studentProfile?.academics?.class12?.board || 'WBCHSE' }}</strong></p>
+          <p>Stream: <strong>{{ studentProfile?.academics?.class12?.stream || 'Science' }}</strong></p>
+          <p>PCM Aggregate: <strong>{{ studentProfile?.academics?.class12?.pcmPercentage || studentProfile?.academics?.class12?.percentage || 88 }}%</strong></p>
+        </div>
+
+        <div class="acad-card">
+          <h4>Entrance Examination</h4>
+          <p>Exam: <strong>{{ studentProfile?.academics?.entranceExam?.examType || 'WBJEE' }}</strong></p>
+          <p>Rank: <strong>{{ studentProfile?.academics?.entranceExam?.rank || 'N/A' }}</strong></p>
+          <p>Score: <strong>{{ studentProfile?.academics?.entranceExam?.score || 'N/A' }}</strong></p>
+        </div>
+      </div>
+
+      <div class="wizard-footer">
+        <button class="btn btn-outline" (click)="goToStep(2)">&larr; Back</button>
+        <button class="btn btn-primary" (click)="goToStep(4)">Continue to Document Upload &rarr;</button>
+      </div>
+    </div>
+
+    <!-- STEP 4: Document Upload -->
+    <div *ngIf="currentStep === 4" class="step-container">
+      <div class="step-header">
+        <h3>Step 4: Upload Mandatory Certificates & Documents</h3>
+        <p>Upload PDF or JPEG files for scrutiny (Max 5MB each).</p>
+      </div>
+
+      <div class="doc-upload-grid">
+        <!-- Photo -->
+        <div class="doc-upload-item">
+          <div class="doc-info">
+            <span class="material-icons">account_box</span>
+            <div>
+              <h5>Passport Size Photo *</h5>
+              <span class="status-txt" [class.uploaded]="uploadedDocs['PHOTO']">
+                {{ uploadedDocs['PHOTO'] ? 'Uploaded: ' + uploadedDocs['PHOTO'].originalFileName : 'Required' }}
+              </span>
+            </div>
+          </div>
+          <label class="btn btn-outline btn-sm upload-btn">
+            <span class="material-icons">cloud_upload</span> Choose File
+            <input type="file" (change)="onFileUpload($event, 'PHOTO')" accept=".jpg,.jpeg,.png" hidden />
+          </label>
+        </div>
+
+        <!-- Signature -->
+        <div class="doc-upload-item">
+          <div class="doc-info">
+            <span class="material-icons">draw</span>
+            <div>
+              <h5>Candidate Signature *</h5>
+              <span class="status-txt" [class.uploaded]="uploadedDocs['SIGNATURE']">
+                {{ uploadedDocs['SIGNATURE'] ? 'Uploaded: ' + uploadedDocs['SIGNATURE'].originalFileName : 'Required' }}
+              </span>
+            </div>
+          </div>
+          <label class="btn btn-outline btn-sm upload-btn">
+            <span class="material-icons">cloud_upload</span> Choose File
+            <input type="file" (change)="onFileUpload($event, 'SIGNATURE')" accept=".jpg,.jpeg,.png" hidden />
+          </label>
+        </div>
+
+        <!-- Class 10 Marksheet -->
+        <div class="doc-upload-item">
+          <div class="doc-info">
+            <span class="material-icons">description</span>
+            <div>
+              <h5>Class 10 Board Marksheet *</h5>
+              <span class="status-txt" [class.uploaded]="uploadedDocs['CLASS_10_MARKSHEET']">
+                {{ uploadedDocs['CLASS_10_MARKSHEET'] ? 'Uploaded: ' + uploadedDocs['CLASS_10_MARKSHEET'].originalFileName : 'Required' }}
+              </span>
+            </div>
+          </div>
+          <label class="btn btn-outline btn-sm upload-btn">
+            <span class="material-icons">cloud_upload</span> Choose File
+            <input type="file" (change)="onFileUpload($event, 'CLASS_10_MARKSHEET')" accept=".pdf,.jpg,.jpeg,.png" hidden />
+          </label>
+        </div>
+
+        <!-- Class 12 Marksheet -->
+        <div class="doc-upload-item">
+          <div class="doc-info">
+            <span class="material-icons">description</span>
+            <div>
+              <h5>Class 12 Board Marksheet *</h5>
+              <span class="status-txt" [class.uploaded]="uploadedDocs['CLASS_12_MARKSHEET']">
+                {{ uploadedDocs['CLASS_12_MARKSHEET'] ? 'Uploaded: ' + uploadedDocs['CLASS_12_MARKSHEET'].originalFileName : 'Required' }}
+              </span>
+            </div>
+          </div>
+          <label class="btn btn-outline btn-sm upload-btn">
+            <span class="material-icons">cloud_upload</span> Choose File
+            <input type="file" (change)="onFileUpload($event, 'CLASS_12_MARKSHEET')" accept=".pdf,.jpg,.jpeg,.png" hidden />
+          </label>
+        </div>
+
+        <!-- Scorecard -->
+        <div class="doc-upload-item">
+          <div class="doc-info">
+            <span class="material-icons">emoji_events</span>
+            <div>
+              <h5>Entrance Rank Scorecard</h5>
+              <span class="status-txt" [class.uploaded]="uploadedDocs['ENTRANCE_SCORECARD']">
+                {{ uploadedDocs['ENTRANCE_SCORECARD'] ? 'Uploaded: ' + uploadedDocs['ENTRANCE_SCORECARD'].originalFileName : 'Optional' }}
+              </span>
+            </div>
+          </div>
+          <label class="btn btn-outline btn-sm upload-btn">
+            <span class="material-icons">cloud_upload</span> Choose File
+            <input type="file" (change)="onFileUpload($event, 'ENTRANCE_SCORECARD')" accept=".pdf,.jpg,.jpeg,.png" hidden />
+          </label>
+        </div>
+      </div>
+
+      <div class="wizard-footer">
+        <button class="btn btn-outline" (click)="goToStep(3)">&larr; Back</button>
+        <button class="btn btn-primary" (click)="goToStep(5)">Review & Undertaking &rarr;</button>
+      </div>
+    </div>
+
+    <!-- STEP 5: Final Review & Submit -->
+    <div *ngIf="currentStep === 5" class="step-container">
+      <div class="step-header">
+        <h3>Step 5: Review Application & Declaration</h3>
+        <p>Verify all details prior to final submission to the Admissions Scrutiny Board.</p>
+      </div>
+
+      <div class="summary-card">
+        <h4>Application Summary</h4>
+        <div class="summary-grid">
+          <div><span class="lbl">Program Applied:</span> <strong>{{ selectedCourse?.name }} ({{ selectedCourse?.courseCode }})</strong></div>
+          <div><span class="lbl">Department:</span> <strong>{{ selectedCourse?.department }}</strong></div>
+          <div><span class="lbl">Applicant:</span> <strong>{{ authService.currentUserValue?.name }}</strong></div>
+          <div><span class="lbl">Application Fee:</span> <strong>₹ 2,000 (Non-Refundable)</strong></div>
+        </div>
+      </div>
+
+      <div class="declaration-box">
+        <label class="dec-label">
+          <input type="checkbox" [(ngModel)]="declarationAccepted" />
+          <span>
+            <strong>Undertaking:</strong> I hereby certify that the particulars furnished above are true and complete. I understand that admission is provisional subject to document verification by the IEM Admissions Committee.
+          </span>
+        </label>
+      </div>
+
+      <div class="wizard-footer">
+        <button class="btn btn-outline" (click)="goToStep(4)">&larr; Back</button>
+        <button class="btn btn-primary" [disabled]="!declarationAccepted || isSaving" (click)="submitApplication()">
+          <span *ngIf="!isSaving">Submit Application & Proceed to Fee Payment</span>
+          <span *ngIf="isSaving">Submitting Form...</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 6: Fee Payment -->
+    <div *ngIf="currentStep === 6" class="step-container">
+      <div class="step-header" *ngIf="!paymentSuccess">
+        <h3>Step 6: Pay Application Processing Fee</h3>
+        <p>Complete the mock fee payment of ₹ 2,000 for official registration.</p>
+      </div>
+
+      <!-- Payment Form -->
+      <div class="payment-box" *ngIf="!paymentSuccess">
+        <div class="fee-receipt-preview">
+          <div class="preview-row">
+            <span>Application Fee (IEM Kolkata)</span>
+            <span>₹ 2,000.00</span>
+          </div>
+          <div class="preview-row total">
+            <span>Total Payable Amount</span>
+            <span>₹ 2,000.00</span>
+          </div>
+        </div>
+
+        <div class="payment-methods">
+          <label class="pay-method" [class.selected]="paymentMethod === 'UPI'">
+            <input type="radio" name="payMethod" [(ngModel)]="paymentMethod" value="UPI" />
+            <span class="material-icons">qr_code_2</span> UPI (GooglePay / PhonePe / Paytm)
+          </label>
+          <label class="pay-method" [class.selected]="paymentMethod === 'CREDIT_CARD'">
+            <input type="radio" name="payMethod" [(ngModel)]="paymentMethod" value="CREDIT_CARD" />
+            <span class="material-icons">credit_card</span> Credit / Debit Card
+          </label>
+          <label class="pay-method" [class.selected]="paymentMethod === 'NET_BANKING'">
+            <input type="radio" name="payMethod" [(ngModel)]="paymentMethod" value="NET_BANKING" />
+            <span class="material-icons">account_balance</span> Net Banking (All Indian Banks)
+          </label>
+        </div>
+
+        <button class="btn btn-success btn-lg btn-block" (click)="payMockFee()" [disabled]="isProcessingPayment">
+          <span class="material-icons">lock</span>
+          <span *ngIf="!isProcessingPayment">Pay ₹ 2,000 via Mock Gateway</span>
+          <span *ngIf="isProcessingPayment">Simulating Bank Transaction...</span>
+        </button>
+      </div>
+
+      <!-- Payment Success Screen -->
+      <div class="payment-success-screen" *ngIf="paymentSuccess">
+        <div class="success-icon-box">
+          <span class="material-icons">check_circle</span>
+        </div>
+        <h3>Application & Payment Successful!</h3>
+        <p class="success-desc">
+          Your admission application has been registered with reference <strong>{{ applicationNumber }}</strong>.
+        </p>
+
+        <div class="receipt-card">
+          <div class="r-row"><span>Transaction ID:</span> <strong>{{ paymentReceipt?.transactionId }}</strong></div>
+          <div class="r-row"><span>Receipt Number:</span> <strong>{{ paymentReceipt?.receiptNumber }}</strong></div>
+          <div class="r-row"><span>Amount Paid:</span> <strong>₹ {{ paymentReceipt?.amount | number }} (INR)</strong></div>
+          <div class="r-row"><span>Status:</span> <span class="badge badge-approved">Confirmed</span></div>
+        </div>
+
+        <div class="success-actions">
+          <button class="btn btn-primary" (click)="downloadForm()">
+            <span class="material-icons">download</span> Download PDF Application Form
+          </button>
+          <a routerLink="/student/dashboard" class="btn btn-outline">
+            Go to Student Dashboard
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

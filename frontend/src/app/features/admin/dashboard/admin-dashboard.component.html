@@ -1,0 +1,132 @@
+<div class="admin-page container" *ngIf="!isLoading && stats">
+  <div class="page-header card">
+    <div>
+      <div class="header-tag">ADMINISTRATIVE DIRECTIVE</div>
+      <h2>Executive Admissions & Analytics Dashboard</h2>
+      <p>Institutional overview of applications, revenue collection, seats fill-rate, and staff management.</p>
+    </div>
+    <div class="admin-quick-actions">
+      <a routerLink="/admin/courses" class="btn btn-primary btn-sm">
+        <span class="material-icons">add</span> Manage Courses
+      </a>
+      <a routerLink="/admin/officers" class="btn btn-outline btn-sm">
+        <span class="material-icons">person_add</span> Manage Officers
+      </a>
+    </div>
+  </div>
+
+  <!-- KPI Grid (6 Cards) -->
+  <div class="kpi-grid">
+    <div class="kpi-card card">
+      <div class="kpi-icon blue"><span class="material-icons">receipt_long</span></div>
+      <div class="kpi-info">
+        <div class="kpi-val">{{ stats.totalApplications }}</div>
+        <div class="kpi-lbl">Total Applications</div>
+      </div>
+    </div>
+
+    <div class="kpi-card card">
+      <div class="kpi-icon green"><span class="material-icons">check_circle</span></div>
+      <div class="kpi-info">
+        <div class="kpi-val">{{ stats.approvedApplications }}</div>
+        <div class="kpi-lbl">Approved Admissions</div>
+      </div>
+    </div>
+
+    <div class="kpi-card card">
+      <div class="kpi-icon amber"><span class="material-icons">hourglass_top</span></div>
+      <div class="kpi-info">
+        <div class="kpi-val">{{ stats.pendingApplications }}</div>
+        <div class="kpi-lbl">Pending Scrutiny</div>
+      </div>
+    </div>
+
+    <div class="kpi-card card">
+      <div class="kpi-icon red"><span class="material-icons">cancel</span></div>
+      <div class="kpi-info">
+        <div class="kpi-val">{{ stats.rejectedApplications }}</div>
+        <div class="kpi-lbl">Rejected</div>
+      </div>
+    </div>
+
+    <div class="kpi-card card">
+      <div class="kpi-icon purple"><span class="material-icons">account_balance_wallet</span></div>
+      <div class="kpi-info">
+        <div class="kpi-val">₹ {{ stats.totalRevenue | number }}</div>
+        <div class="kpi-lbl">Application Fees Collected</div>
+      </div>
+    </div>
+
+    <div class="kpi-card card">
+      <div class="kpi-icon gold"><span class="material-icons">people</span></div>
+      <div class="kpi-info">
+        <div class="kpi-val">{{ stats.totalStudents }} / {{ stats.totalOfficers }}</div>
+        <div class="kpi-lbl">Registered Students / Officers</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Visual Analytics Section -->
+  <div class="analytics-grid">
+    <!-- Chart 1: Monthly Trends -->
+    <div class="analytics-card card">
+      <div class="chart-header">
+        <h3>Monthly Admission Trends (Session 2026)</h3>
+        <span class="chart-tag">Trend Graph</span>
+      </div>
+
+      <div class="bar-chart-container">
+        <div class="bar-col" *ngFor="let item of monthlyTrends">
+          <div class="bar-track">
+            <div class="bar-fill" [style.height.%]="(item.total / getMaxMonthlyTotal()) * 100">
+              <span class="bar-val">{{ item.total }}</span>
+            </div>
+          </div>
+          <span class="bar-label">{{ item.monthName }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chart 2: Program Seat Occupancy -->
+    <div class="analytics-card card">
+      <div class="chart-header">
+        <h3>Course-Wise Seat Utilization</h3>
+        <span class="chart-tag">Seat Matrix</span>
+      </div>
+
+      <div class="program-bars-list">
+        <div class="prog-bar-item" *ngFor="let c of courseStats">
+          <div class="prog-info">
+            <span class="prog-name">{{ c.courseCode }}</span>
+            <span class="prog-seats">{{ c.totalSeats - c.availableSeats }} / {{ c.totalSeats }} filled</span>
+          </div>
+          <div class="p-track">
+            <div class="p-fill" [style.width.%]="((c.totalSeats - c.availableSeats) / c.totalSeats) * 100"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Activity Logs Stream -->
+  <div class="activity-section card">
+    <div class="section-title-row">
+      <h3>System Audit Trail & Recent Actions</h3>
+      <a routerLink="/admin/audit-logs" class="view-all-link">View Full Log Trail &rarr;</a>
+    </div>
+
+    <div class="activity-list">
+      <div class="act-item" *ngFor="let log of recentActivity">
+        <div class="act-marker">
+          <span class="material-icons">bolt</span>
+        </div>
+        <div class="act-body">
+          <div class="act-title">
+            <strong>{{ log.userEmail }}</strong> performed <code>{{ log.action }}</code> in module <strong>{{ log.module }}</strong>
+          </div>
+          <span class="act-time">{{ log.createdAt | date:'medium' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

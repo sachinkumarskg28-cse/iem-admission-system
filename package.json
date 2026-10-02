@@ -1,0 +1,25 @@
+{
+  "name": "iem-admission-system-root",
+  "version": "1.0.0",
+  "description": "Full-Stack Admission Management System for Institute of Engineering & Management (IEM), Kolkata",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "server": "node backend/server.js",
+    "seed": "npm --prefix backend run seed",
+    "install:backend": "npm --prefix backend install",
+    "install:frontend": "npm --prefix frontend install",
+    "postinstall": "npm --prefix backend install"
+  },
+  "keywords": [
+    "mean-stack",
+    "admission-management-system",
+    "iem-kolkata",
+    "angular",
+    "express",
+    "mongodb",
+    "nodejs"
+  ],
+  "author": "Institute of Engineering & Management (IEM)",
+  "license": "ISC"
+}

@@ -1,0 +1,89 @@
+<div class="app-detail-page container" *ngIf="!isLoading && application">
+  <div class="page-top-nav">
+    <a routerLink="/student/dashboard" class="back-link">&larr; Back to Dashboard</a>
+  </div>
+
+  <div class="detail-header card">
+    <div class="dh-left">
+      <span class="app-num-tag">APPLICATION NUMBER</span>
+      <h2>{{ application.applicationNumber }}</h2>
+      <p class="course-name">{{ application.course?.name }} ({{ application.course?.courseCode }}) &bull; {{ application.course?.department }}</p>
+    </div>
+    <div class="dh-right">
+      <app-status-badge [status]="application.status"></app-status-badge>
+      <button class="btn btn-primary btn-sm" (click)="downloadPDF()">
+        <span class="material-icons">download</span> Download PDF
+      </button>
+    </div>
+  </div>
+
+  <!-- Review Grid -->
+  <div class="detail-grid">
+    <!-- Left Column: Details & Documents -->
+    <div class="left-col">
+      <!-- Section: Overview -->
+      <div class="card detail-section">
+        <h3>Application Overview</h3>
+        <div class="info-rows">
+          <div class="i-row"><span>Academic Session:</span> <strong>{{ application.admissionCycle || '2026-2027' }}</strong></div>
+          <div class="i-row"><span>Submission Date:</span> <strong>{{ application.submissionDate ? (application.submissionDate | date:'medium') : 'Draft' }}</strong></div>
+          <div class="i-row"><span>Application Fee Status:</span> <strong [class.success]="application.isFeePaid">{{ application.isFeePaid ? '₹ 2,000 Paid' : 'Fee Pending' }}</strong></div>
+          <div class="i-row"><span>Merit Calculation Score:</span> <strong>{{ application.meritScore || 'Pending Verification' }}</strong></div>
+        </div>
+      </div>
+
+      <!-- Section: Officer Remarks -->
+      <div class="card detail-section" *ngIf="application.officerRemarks">
+        <h3>Admission Scrutiny Remarks</h3>
+        <div class="remarks-box">
+          <span class="material-icons">rate_review</span>
+          <div>
+            <p>{{ application.officerRemarks }}</p>
+            <span class="officer-meta">Reviewed by {{ application.assignedOfficer?.name || 'Admission Officer' }} &bull; {{ application.decisionDate | date:'mediumDate' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Uploaded Documents -->
+      <div class="card detail-section">
+        <h3>Uploaded Documents & Certificates</h3>
+        <div class="docs-list" *ngIf="documents.length > 0">
+          <div class="doc-item" *ngFor="let doc of documents">
+            <div class="doc-icon">
+              <span class="material-icons">description</span>
+            </div>
+            <div class="doc-meta">
+              <h5>{{ doc.title || doc.documentType.replace('_', ' ') }}</h5>
+              <span>{{ doc.originalFileName }}</span>
+            </div>
+            <span class="badge" [class.badge-approved]="doc.status === 'VERIFIED'" [class.badge-under_review]="doc.status === 'PENDING'" [class.badge-rejected]="doc.status === 'REJECTED'">
+              {{ doc.status }}
+            </span>
+          </div>
+        </div>
+        <div *ngIf="documents.length === 0" class="no-docs">
+          No documents attached to this application yet.
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Timeline -->
+    <div class="right-col">
+      <div class="card timeline-card">
+        <h3>Lifecycle Timeline</h3>
+        <div class="timeline-list">
+          <div class="t-node" *ngFor="let item of application.timeline; let last = last" [class.active]="last">
+            <div class="t-marker">
+              <span class="material-icons">{{ item.status === 'APPROVED' ? 'check_circle' : 'radio_button_checked' }}</span>
+            </div>
+            <div class="t-body">
+              <div class="t-status">{{ item.status.replace('_', ' ') }}</div>
+              <p class="t-comment">{{ item.comment }}</p>
+              <span class="t-time">{{ item.timestamp | date:'medium' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

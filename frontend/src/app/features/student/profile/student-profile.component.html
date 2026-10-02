@@ -1,0 +1,240 @@
+<div class="profile-page container">
+  <div class="profile-header card">
+    <div>
+      <h2>Applicant Profile Management</h2>
+      <p>Ensure all personal, guardian, address, and academic records are accurate.</p>
+    </div>
+    <div class="completion-pill">
+      <span>{{ completionPercentage }}% Complete</span>
+    </div>
+  </div>
+
+  <div *ngIf="successMessage" class="alert alert-success">
+    <span class="material-icons">check_circle</span> {{ successMessage }}
+  </div>
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    <span class="material-icons">error</span> {{ errorMessage }}
+  </div>
+
+  <div class="profile-layout card" *ngIf="!isLoading">
+    <!-- Tabs Nav -->
+    <div class="profile-tabs">
+      <button class="tab-btn" [class.active]="activeTab === 'personal'" (click)="setTab('personal')">
+        <span class="material-icons">badge</span> Personal Info
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'guardian'" (click)="setTab('guardian')">
+        <span class="material-icons">family_restroom</span> Guardian Details
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'address'" (click)="setTab('address')">
+        <span class="material-icons">home</span> Address Details
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'academics'" (click)="setTab('academics')">
+        <span class="material-icons">school</span> Academic Qualifications
+      </button>
+    </div>
+
+    <!-- Form Content -->
+    <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="tab-content">
+      <!-- 1. Personal Info -->
+      <div *ngIf="activeTab === 'personal'" class="form-section">
+        <h3>Personal Information</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" formControlName="name" />
+          </div>
+          <div class="form-group">
+            <label>Mobile Number</label>
+            <input type="tel" formControlName="phone" />
+          </div>
+          <div class="form-group">
+            <label>Date of Birth</label>
+            <input type="date" formControlName="dob" />
+          </div>
+          <div class="form-group">
+            <label>Gender</label>
+            <select formControlName="gender">
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Blood Group</label>
+            <select formControlName="bloodGroup">
+              <option value="A+">A+</option>
+              <option value="A-">A-</option>
+              <option value="B+">B+</option>
+              <option value="B-">B-</option>
+              <option value="AB+">AB+</option>
+              <option value="AB-">AB-</option>
+              <option value="O+">O+</option>
+              <option value="O-">O-</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Category / Reservation</label>
+            <select formControlName="category">
+              <option value="General">General</option>
+              <option value="OBC-A">OBC-A</option>
+              <option value="OBC-B">OBC-B</option>
+              <option value="SC">SC</option>
+              <option value="ST">ST</option>
+              <option value="EWS">EWS</option>
+              <option value="TFW">TFW</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Guardian Details -->
+      <div *ngIf="activeTab === 'guardian'" class="form-section" formGroupName="guardian">
+        <h3>Parent & Guardian Details</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Father's Name</label>
+            <input type="text" formControlName="fatherName" />
+          </div>
+          <div class="form-group">
+            <label>Father's Occupation</label>
+            <input type="text" formControlName="fatherOccupation" />
+          </div>
+          <div class="form-group">
+            <label>Father's Mobile</label>
+            <input type="tel" formControlName="fatherPhone" />
+          </div>
+          <div class="form-group">
+            <label>Mother's Name</label>
+            <input type="text" formControlName="motherName" />
+          </div>
+          <div class="form-group">
+            <label>Mother's Occupation</label>
+            <input type="text" formControlName="motherOccupation" />
+          </div>
+          <div class="form-group">
+            <label>Annual Family Income (₹)</label>
+            <input type="number" formControlName="annualIncome" />
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Address -->
+      <div *ngIf="activeTab === 'address'" class="form-section" formGroupName="address">
+        <div formGroupName="present">
+          <h3>Present Address</h3>
+          <div class="form-grid">
+            <div class="form-group span-2">
+              <label>Street Address / House No.</label>
+              <input type="text" formControlName="street" />
+            </div>
+            <div class="form-group">
+              <label>City / Town</label>
+              <input type="text" formControlName="city" />
+            </div>
+            <div class="form-group">
+              <label>District</label>
+              <input type="text" formControlName="district" />
+            </div>
+            <div class="form-group">
+              <label>State</label>
+              <input type="text" formControlName="state" />
+            </div>
+            <div class="form-group">
+              <label>PIN Code</label>
+              <input type="text" formControlName="pincode" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Academics -->
+      <div *ngIf="activeTab === 'academics'" class="form-section" formGroupName="academics">
+        <h3>Academic History & Scores</h3>
+
+        <!-- Class 10 -->
+        <h4 class="subhead">Class X (Secondary Examination)</h4>
+        <div class="form-grid" formGroupName="class10">
+          <div class="form-group">
+            <label>Board / Council</label>
+            <input type="text" formControlName="board" placeholder="e.g. CBSE / ICSE / WBBSE" />
+          </div>
+          <div class="form-group">
+            <label>School Name</label>
+            <input type="text" formControlName="schoolName" />
+          </div>
+          <div class="form-group">
+            <label>Passing Year</label>
+            <input type="number" formControlName="passingYear" />
+          </div>
+          <div class="form-group">
+            <label>Total Percentage (%)</label>
+            <input type="number" formControlName="percentage" step="0.01" />
+          </div>
+        </div>
+
+        <!-- Class 12 -->
+        <h4 class="subhead">Class XII (Higher Secondary Examination)</h4>
+        <div class="form-grid" formGroupName="class12">
+          <div class="form-group">
+            <label>Board / Council</label>
+            <input type="text" formControlName="board" placeholder="e.g. CBSE / ISC / WBCHSE" />
+          </div>
+          <div class="form-group">
+            <label>School Name</label>
+            <input type="text" formControlName="schoolName" />
+          </div>
+          <div class="form-group">
+            <label>Stream</label>
+            <input type="text" formControlName="stream" placeholder="Science / Commerce / Arts" />
+          </div>
+          <div class="form-group">
+            <label>Overall Percentage (%)</label>
+            <input type="number" formControlName="percentage" step="0.01" />
+          </div>
+          <div class="form-group">
+            <label>PCM Aggregate Percentage (%)</label>
+            <input type="number" formControlName="pcmPercentage" step="0.01" />
+          </div>
+        </div>
+
+        <!-- Entrance Exam -->
+        <h4 class="subhead">Competitive Entrance Examination</h4>
+        <div class="form-grid" formGroupName="entranceExam">
+          <div class="form-group">
+            <label>Exam Type</label>
+            <select formControlName="examType">
+              <option value="WBJEE">WBJEE</option>
+              <option value="JEE Main">JEE Main</option>
+              <option value="IEMJEE">IEMJEE</option>
+              <option value="GATE">GATE</option>
+              <option value="CAT">CAT</option>
+              <option value="MAT">MAT</option>
+              <option value="Direct / Merit">Direct / Merit</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Roll Number</label>
+            <input type="text" formControlName="rollNumber" />
+          </div>
+          <div class="form-group">
+            <label>All India / State Rank</label>
+            <input type="number" formControlName="rank" />
+          </div>
+          <div class="form-group">
+            <label>Score / Percentile</label>
+            <input type="number" formControlName="score" step="0.01" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Footer -->
+      <div class="form-footer">
+        <button type="submit" class="btn btn-primary" [disabled]="isSaving">
+          <span class="material-icons">save</span>
+          <span *ngIf="!isSaving">Save Profile Changes</span>
+          <span *ngIf="isSaving">Saving...</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

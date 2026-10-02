@@ -1,0 +1,115 @@
+<header class="iem-navbar">
+  <div class="nav-container">
+    <!-- Brand Logo -->
+    <a routerLink="/" class="brand-link">
+      <div class="logo-badge">IEM</div>
+      <div class="brand-text">
+        <span class="brand-title">IEM KOLKATA</span>
+        <span class="brand-subtitle">Admission Portal 2026</span>
+      </div>
+    </a>
+
+    <!-- Navigation Links -->
+    <nav class="nav-links" [class.open]="isMenuOpen">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-item">
+        <span class="material-icons">home</span> Home
+      </a>
+      <a routerLink="/track" routerLinkActive="active" class="nav-item">
+        <span class="material-icons">track_changes</span> Track Status
+      </a>
+
+      <!-- Student Links -->
+      <ng-container *ngIf="authService.isStudent()">
+        <a routerLink="/student/dashboard" routerLinkActive="active" class="nav-item">
+          <span class="material-icons">dashboard</span> Dashboard
+        </a>
+        <a routerLink="/student/apply" routerLinkActive="active" class="nav-item">
+          <span class="material-icons">edit_document</span> Apply Now
+        </a>
+        <a routerLink="/student/documents" routerLinkActive="active" class="nav-item">
+          <span class="material-icons">folder_shared</span> Documents
+        </a>
+        <a routerLink="/student/profile" routerLinkActive="active" class="nav-item">
+          <span class="material-icons">person</span> Profile
+        </a>
+      </ng-container>
+
+      <!-- Officer Links -->
+      <ng-container *ngIf="authService.isOfficer()">
+        <a routerLink="/officer/dashboard" routerLinkActive="active" class="nav-item">
+          <span class="material-icons">verified_user</span> Scrutiny Queue
+        </a>
+        <a routerLink="/officer/reports" routerLinkActive="active" class="nav-item">
+          <span class="material-icons">analytics</span> Reports
+        </a>
+      </ng-container>
+
+      <!-- Admin Links -->
+      <ng-container *ngIf="authService.isAdmin()">
+        <a routerLink="/admin/dashboard" routerLinkActive="active" class="nav-item">
+          <span class="material-icons">admin_panel_settings</span> Admin Panel
+        </a>
+        <a routerLink="/admin/courses" routerLinkActive="active" class="nav-item">
+          <span class="material-icons">school</span> Courses & Seats
+        </a>
+        <a routerLink="/admin/audit-logs" routerLinkActive="active" class="nav-item">
+          <span class="material-icons">history</span> Audit Logs
+        </a>
+      </ng-container>
+    </nav>
+
+    <!-- Right Controls -->
+    <div class="nav-actions">
+      <!-- Dark/Light Theme Toggle -->
+      <button class="icon-btn theme-toggle" (click)="toggleTheme()" [title]="(themeService.isDarkMode$ | async) ? 'Switch to Light Mode' : 'Switch to Dark Mode'">
+        <span class="material-icons">{{ (themeService.isDarkMode$ | async) ? 'light_mode' : 'dark_mode' }}</span>
+      </button>
+
+      <!-- Notifications -->
+      <div class="notif-wrapper" *ngIf="authService.isAuthenticated()">
+        <button class="icon-btn notif-btn" (click)="toggleNotifications()" title="Notifications">
+          <span class="material-icons">notifications</span>
+          <span class="badge-dot" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+        </button>
+
+        <div class="notif-dropdown" *ngIf="showNotifications">
+          <div class="notif-header">
+            <h4>Notifications</h4>
+            <button class="mark-btn" (click)="markAllRead()">Mark all as read</button>
+          </div>
+          <div class="notif-list">
+            <div *ngIf="notifications.length === 0" class="notif-empty">
+              No new notifications.
+            </div>
+            <div *ngFor="let n of notifications" class="notif-item" [class.unread]="!n.isRead">
+              <div class="notif-title">{{ n.title }}</div>
+              <div class="notif-msg">{{ n.message }}</div>
+              <div class="notif-time">{{ n.createdAt | date:'short' }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Auth Controls -->
+      <div class="auth-controls" *ngIf="!authService.isAuthenticated()">
+        <a routerLink="/auth/login" class="btn btn-outline btn-sm">Login</a>
+        <a routerLink="/auth/register" class="btn btn-primary btn-sm">Register</a>
+      </div>
+
+      <div class="user-profile" *ngIf="authService.isAuthenticated()">
+        <div class="user-chip">
+          <span class="user-name">{{ authService.currentUserValue?.name }}</span>
+          <span class="user-role badge">{{ authService.currentUserValue?.role }}</span>
+        </div>
+        <button class="btn btn-outline btn-sm logout-btn" (click)="logout()" title="Logout">
+          <span class="material-icons">logout</span>
+        </button>
+      </div>
+
+      <!-- Mobile Menu Toggle -->
+      <button class="icon-btn mobile-menu-toggle" (click)="isMenuOpen = !isMenuOpen">
+        <span class="material-icons">{{ isMenuOpen ? 'close' : 'menu' }}</span>
+      </button>
+    </div>
+  </div>
+</header>

@@ -1,0 +1,81 @@
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="brand-badge">IEM</div>
+      <h2>Welcome Back</h2>
+      <p>Log in to access your IEM Kolkata Admission Portal</p>
+    </div>
+
+    <!-- Session Expired Notice -->
+    <div *ngIf="sessionExpired" class="alert alert-warning">
+      <span class="material-icons">info</span> Your session has expired. Please log in again.
+    </div>
+
+    <!-- Error Alert -->
+    <div *ngIf="errorMessage" class="alert alert-danger">
+      <span class="material-icons">error</span> {{ errorMessage }}
+    </div>
+
+    <!-- Quick Demo Accounts -->
+    <div class="demo-section">
+      <div class="demo-label">ONE-CLICK DEMO LOGIN</div>
+      <div class="demo-buttons">
+        <button type="button" class="demo-btn student" (click)="fillDemo('student')">
+          <span class="material-icons">school</span> Student
+        </button>
+        <button type="button" class="demo-btn officer" (click)="fillDemo('officer')">
+          <span class="material-icons">verified_user</span> Officer
+        </button>
+        <button type="button" class="demo-btn admin" (click)="fillDemo('admin')">
+          <span class="material-icons">admin_panel_settings</span> Admin
+        </button>
+      </div>
+    </div>
+
+    <!-- Form -->
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          placeholder="name@example.com"
+          [class.is-invalid]="loginForm.get('email')?.touched && loginForm.get('email')?.invalid"
+        />
+        <div class="error" *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.errors?.['required']">
+          Email is required.
+        </div>
+        <div class="error" *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.errors?.['email']">
+          Please enter a valid email address.
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="label-row">
+          <label for="password">Password</label>
+          <a routerLink="/auth/forgot-password" class="forgot-link">Forgot password?</a>
+        </div>
+        <input
+          id="password"
+          type="password"
+          formControlName="password"
+          placeholder="••••••••"
+          [class.is-invalid]="loginForm.get('password')?.touched && loginForm.get('password')?.invalid"
+        />
+        <div class="error" *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.errors?.['required']">
+          Password is required.
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block" [disabled]="loginForm.invalid || isLoading">
+        <span *ngIf="!isLoading">Sign In</span>
+        <span *ngIf="isLoading">Authenticating...</span>
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      <p>Don't have an account? <a routerLink="/auth/register">Register as Student</a></p>
+    </div>
+  </div>
+</div>

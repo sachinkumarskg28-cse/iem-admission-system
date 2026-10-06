@@ -73,11 +73,23 @@ export class AuthService {
   }
 
   isOfficer(): boolean {
-    return this.currentUserValue?.role === 'officer';
+    return this.currentUserValue?.role === 'officer' || this.currentUserValue?.role === 'admission_officer';
   }
 
   isAdmin(): boolean {
-    return this.currentUserValue?.role === 'admin';
+    return this.currentUserValue?.role === 'admin' || this.currentUserValue?.role === 'super_admin';
+  }
+
+  isFaculty(): boolean {
+    return this.currentUserValue?.role === 'faculty';
+  }
+
+  isAccounts(): boolean {
+    return this.currentUserValue?.role === 'accounts';
+  }
+
+  isSuperAdmin(): boolean {
+    return this.currentUserValue?.role === 'super_admin';
   }
 
   forgotPassword(email: string): Observable<any> {

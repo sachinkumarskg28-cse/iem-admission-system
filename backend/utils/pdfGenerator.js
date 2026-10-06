@@ -1,4 +1,5 @@
-const PDFDocument = require('pdfkit');
+const path = require('path');
+const fs = require('fs');
 
 /**
  * Generate Application Form PDF
@@ -24,17 +25,29 @@ const generateApplicationPDF = (applicationData, res) => {
   } = applicationData;
 
   // Header Background Banner
-  doc.rect(40, 40, 515, 65).fill('#0b3b60');
+  doc.rect(40, 40, 515, 75).fill('#0b3b60');
+
+  // Embed official IEM Logo
+  const logoPath = path.join(__dirname, '../public/assets/iem-logo.png');
+  if (fs.existsSync(logoPath)) {
+    try {
+      doc.image(logoPath, 46, 46, { width: 56 });
+    } catch (err) {
+      console.warn('PDF logo embed fallback:', err.message);
+    }
+  }
 
   // Title inside Banner
-  doc.fillColor('#ffffff').fontSize(14).font('Helvetica-Bold')
-    .text('INSTITUTE OF ENGINEERING & MANAGEMENT (IEM)', 50, 50, { align: 'center' });
-  doc.fontSize(8.5).font('Helvetica')
-    .text('Sector V, Salt Lake, Kolkata - 700091, West Bengal, India | NAAC "A" Grade', 50, 68, { align: 'center' });
-  doc.fontSize(10).font('Helvetica-Bold')
-    .text('OFFICIAL ADMISSION APPLICATION FORM & REGISTRATION RECORD', 50, 82, { align: 'center' });
+  doc.fillColor('#ffffff').fontSize(13).font('Helvetica-Bold')
+    .text('INSTITUTE OF ENGINEERING & MANAGEMENT (IEM)', 105, 47, { align: 'center', width: 440 });
+  doc.fontSize(8).font('Helvetica').fillColor('#e2e8f0')
+    .text('Sector V, Salt Lake, Kolkata - 700091, WB, India | NAAC "A" Grade | NBA Accredited', 105, 63, { align: 'center', width: 440 });
+  doc.fontSize(7.5).font('Helvetica-Oblique').fillColor('#fde047')
+    .text('"Good Education, Good Jobs"  •  Affiliated to MAKAUT  •  Approved by AICTE', 105, 76, { align: 'center', width: 440 });
+  doc.fontSize(9).font('Helvetica-Bold').fillColor('#ffffff')
+    .text('OFFICIAL ADMISSION APPLICATION FORM & REGISTRATION RECORD', 105, 90, { align: 'center', width: 440 });
 
-  let y = 120;
+  let y = 126;
 
   // Application Meta Box
   doc.rect(40, y, 515, 30).fillAndStroke('#f0f4f8', '#0b3b60');

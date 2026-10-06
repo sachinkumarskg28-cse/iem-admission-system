@@ -3,15 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>IEM Kolkata | Admission Management System</title>
+  <title>Institute of Engineering & Management (IEM), Kolkata | Official Admission Portal</title>
+  <link rel="icon" type="image/png" href="/assets/iem-logo.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
   <style>
     :root {
       --iem-primary: #0b3b60;
       --iem-primary-hover: #072a45;
+      --iem-crimson: #c9182b;
+      --iem-crimson-hover: #a31221;
       --iem-secondary: #d4af37;
       --iem-secondary-hover: #b89728;
       --iem-accent: #0284c7;
@@ -50,6 +53,8 @@
     .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 18px; font-size: 0.9rem; font-weight: 600; border-radius: var(--radius-sm); border: none; cursor: pointer; transition: all 0.2s; }
     .btn-primary { background: var(--iem-primary); color: #fff; }
     .btn-primary:hover { background: var(--iem-primary-hover); }
+    .btn-crimson { background: var(--iem-crimson); color: #fff; }
+    .btn-crimson:hover { background: var(--iem-crimson-hover); }
     .btn-secondary { background: var(--iem-secondary); color: #1e293b; }
     .btn-outline { background: transparent; border: 1px solid var(--border-color); color: var(--text-main); }
     .btn-outline:hover { background: var(--bg-subtle); }
@@ -59,24 +64,30 @@
     .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
     .btn-block { width: 100%; }
 
+    /* Top Notice Bar */
+    .top-bar { background: #072238; color: #cbd5e1; font-size: 0.78rem; padding: 6px 0; border-bottom: 1px solid #13395b; }
+    .top-bar-inner { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+    .top-bar-left, .top-bar-right { display: flex; align-items: center; gap: 16px; }
+
     /* Header Navbar */
-    .navbar { background: var(--bg-card); border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 1000; box-shadow: var(--shadow-sm); }
-    .nav-inner { display: flex; justify-content: space-between; align-items: center; height: 70px; }
-    .brand { display: flex; align-items: center; gap: 12px; }
-    .logo-badge { background: linear-gradient(135deg, var(--iem-primary), #0284c7); color: #fff; font-family: 'Outfit'; font-weight: 800; font-size: 1.1rem; padding: 8px 12px; border-radius: var(--radius-sm); }
-    .brand-title { font-size: 1.1rem; font-weight: 700; line-height: 1.2; }
-    .brand-subtitle { font-size: 0.75rem; color: var(--iem-secondary); font-weight: 600; }
-    .nav-menu { display: flex; align-items: center; gap: 8px; }
-    .nav-link { display: flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: var(--radius-sm); font-size: 0.88rem; font-weight: 600; color: var(--text-muted); cursor: pointer; }
+    .navbar { background: var(--bg-card); border-bottom: 2px solid var(--iem-primary); position: sticky; top: 0; z-index: 1000; box-shadow: var(--shadow-sm); }
+    .nav-inner { display: flex; justify-content: space-between; align-items: center; height: 76px; }
+    .brand { display: flex; align-items: center; gap: 14px; cursor: pointer; }
+    .brand img { height: 52px; width: auto; object-fit: contain; }
+    .brand-title { font-size: 1.15rem; font-weight: 800; line-height: 1.15; color: var(--iem-primary); letter-spacing: -0.3px; }
+    .brand-subtitle { font-size: 0.75rem; color: var(--iem-crimson); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    .nav-menu { display: flex; align-items: center; gap: 6px; }
+    .nav-link { display: flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: var(--radius-sm); font-size: 0.88rem; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: all 0.15s; }
     .nav-link.active, .nav-link:hover { color: var(--iem-primary); background: var(--bg-subtle); }
     .nav-actions { display: flex; align-items: center; gap: 12px; }
     .icon-btn { background: transparent; border: 1px solid var(--border-color); border-radius: 50%; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-main); }
     .badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 9999px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
-    .badge-approved, .badge-verified, .badge-admitted, .badge-active { background: rgba(16, 185, 129, 0.15); color: #10b981; }
-    .badge-submitted { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
-    .badge-under_review, .badge-pending { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
-    .badge-rejected, .badge-cancelled, .badge-inactive { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
-    .badge-draft { background: rgba(100, 116, 139, 0.15); color: #64748b; }
+    .badge-approved, .badge-verified, .badge-admitted, .badge-active, .badge-success { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+    .badge-submitted, .badge-super_admin, .badge-faculty { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+    .badge-under_review, .badge-pending, .badge-officer { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+    .badge-rejected, .badge-cancelled, .badge-inactive, .badge-danger { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+    .badge-draft, .badge-accounts { background: rgba(100, 116, 139, 0.15); color: #64748b; }
+    .badge-admin { background: rgba(201, 24, 43, 0.15); color: #c9182b; }
 
     /* Main View Area */
     .view-content { flex: 1; }
@@ -88,22 +99,47 @@
     .data-table th { background: var(--bg-subtle); color: var(--text-muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; padding: 12px 16px; border-bottom: 2px solid var(--border-color); text-align: left; }
     .data-table td { padding: 14px 16px; border-bottom: 1px solid var(--border-color); font-size: 0.88rem; }
     .data-table tbody tr:hover { background: var(--bg-subtle); }
+
+    /* Modal */
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
+    .modal-dialog { background: var(--bg-card); border-radius: var(--radius-md); max-width: 650px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 24px; box-shadow: var(--shadow-lg); border: 1px solid var(--border-color); }
+
+    /* Accordion FAQ */
+    .faq-item { border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 10px; background: var(--bg-card); overflow: hidden; }
+    .faq-header { padding: 16px 20px; font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem; }
+    .faq-header:hover { background: var(--bg-subtle); }
+    .faq-body { padding: 0 20px 16px; color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; border-top: 1px dashed var(--border-color); padding-top: 12px; }
   </style>
 </head>
 <body class="light-theme">
-  <!-- Top Navigation -->
+  <!-- Official IEM Institutional Top Strip -->
+  <div class="top-bar">
+    <div class="container top-bar-inner">
+      <div class="top-bar-left">
+        <span><i class="material-icons" style="font-size:13px; vertical-align:middle;">location_on</i> Sector V, Salt Lake, Kolkata - 700091</span>
+        <span><i class="material-icons" style="font-size:13px; vertical-align:middle;">call</i> Helpline: +91 33 2357 2059 / 2995</span>
+        <span><i class="material-icons" style="font-size:13px; vertical-align:middle;">email</i> admissions@iemcal.com</span>
+      </div>
+      <div class="top-bar-right">
+        <span><strong>NAAC Grade 'A'</strong> &bull; NBA Accredited &bull; AICTE Approved</span>
+        <a href="https://iem.edu.in" target="_blank" rel="noopener noreferrer" style="color: #fde047; font-weight:700;">Official IEM Website &rarr;</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Navigation Bar -->
   <header class="navbar">
     <div class="container nav-inner">
       <div class="brand" onclick="navigateTo('home')">
-        <div class="logo-badge">IEM</div>
+        <img src="/assets/iem-logo.png" alt="Institute of Engineering & Management (IEM) Logo" />
         <div>
-          <div class="brand-title">IEM KOLKATA</div>
-          <div class="brand-subtitle">Admission Management System 2026</div>
+          <div class="brand-title">INSTITUTE OF ENGINEERING & MANAGEMENT</div>
+          <div class="brand-subtitle">Good Education, Good Jobs &bull; Admissions 2026</div>
         </div>
       </div>
 
       <nav class="nav-menu" id="nav-menu">
-        <!-- Injected via JavaScript -->
+        <!-- Injected dynamically by app.js -->
       </nav>
 
       <div class="nav-actions">
@@ -117,18 +153,80 @@
 
   <!-- Dynamic Main Content View -->
   <main class="view-content" id="app-view">
-    <!-- View will be rendered dynamically -->
+    <!-- Rendered dynamically by app.js -->
   </main>
 
-  <!-- Footer -->
-  <footer style="background: #081a2b; color: #94a3b8; padding: 40px 0 20px; border-top: 1px solid #1e293b; margin-top: 40px;">
-    <div class="container" style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; flex-wrap: wrap; gap: 16px;">
-      <div>
-        <strong style="color: #fff;">Institute of Engineering & Management (IEM), Kolkata</strong>
-        <p>Sector V, Salt Lake, Kolkata - 700091 | Approved by AICTE & Accredited NAAC 'A'</p>
+  <!-- Modal Container -->
+  <div id="modal-container"></div>
+
+  <!-- Comprehensive Institutional Footer -->
+  <footer style="background: #061828; color: #94a3b8; padding: 50px 0 24px; border-top: 3px solid var(--iem-crimson); margin-top: 50px;">
+    <div class="container">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 36px; margin-bottom: 40px;">
+        <!-- Col 1: Institute Info -->
+        <div>
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 14px;">
+            <img src="/assets/iem-logo.png" alt="IEM Logo" style="height: 48px; background: #fff; padding: 4px; border-radius: 6px;" />
+            <div>
+              <strong style="color: #fff; font-size: 1.05rem; display:block;">IEM KOLKATA</strong>
+              <small style="color: #fde047;">"Good Education, Good Jobs"</small>
+            </div>
+          </div>
+          <p style="font-size: 0.85rem; line-height: 1.6; color: #cbd5e1;">
+            Established in 1989, Institute of Engineering & Management (IEM) is the oldest and leading private engineering & management institute in West Bengal, renowned for top tier placements and academic excellence.
+          </p>
+        </div>
+
+        <!-- Col 2: Quick Links -->
+        <div>
+          <h4 style="color: #fff; font-size: 0.95rem; margin-bottom: 14px; border-bottom: 2px solid var(--iem-secondary); display: inline-block; padding-bottom: 4px;">Quick Links</h4>
+          <ul style="list-style: none; font-size: 0.85rem; line-height: 2;">
+            <li><a style="color: #cbd5e1;" onclick="navigateTo('home')">&bull; Degree Programs & Seat Matrix</a></li>
+            <li><a style="color: #cbd5e1;" onclick="navigateTo('about')">&bull; About IEM Kolkata</a></li>
+            <li><a style="color: #cbd5e1;" onclick="navigateTo('contact')">&bull; Contact Us & Admission Helpline</a></li>
+            <li><a style="color: #cbd5e1;" onclick="navigateTo('track')">&bull; Application Status Tracker</a></li>
+            <li><a style="color: #cbd5e1;" href="https://iem.edu.in" target="_blank" rel="noopener noreferrer">&bull; IEM Main Portal (iem.edu.in)</a></li>
+          </ul>
+        </div>
+
+        <!-- Col 3: Programs Offered -->
+        <div>
+          <h4 style="color: #fff; font-size: 0.95rem; margin-bottom: 14px; border-bottom: 2px solid var(--iem-secondary); display: inline-block; padding-bottom: 4px;">Top Programs</h4>
+          <ul style="list-style: none; font-size: 0.85rem; line-height: 2; color: #cbd5e1;">
+            <li>&bull; B.Tech in Computer Science & Engg (CSE)</li>
+            <li>&bull; B.Tech in Information Technology (IT)</li>
+            <li>&bull; B.Tech in Electronics & Comm. (ECE)</li>
+            <li>&bull; Master of Business Administration (MBA)</li>
+            <li>&bull; Master of Computer Applications (MCA)</li>
+            <li>&bull; Bachelor of Computer Applications (BCA)</li>
+          </ul>
+        </div>
+
+        <!-- Col 4: Contact & Campus -->
+        <div>
+          <h4 style="color: #fff; font-size: 0.95rem; margin-bottom: 14px; border-bottom: 2px solid var(--iem-secondary); display: inline-block; padding-bottom: 4px;">Campus Address</h4>
+          <p style="font-size: 0.85rem; line-height: 1.6; color: #cbd5e1; margin-bottom: 10px;">
+            <strong>Institute of Engineering & Management</strong><br/>
+            Sector V, Salt Lake Electronics Complex,<br/>
+            Kolkata - 700091, West Bengal, India.
+          </p>
+          <p style="font-size: 0.85rem; color: #cbd5e1;">
+            <strong>Helpline:</strong> +91 33 2357 2059 / 2995<br/>
+            <strong>WhatsApp:</strong> +91 9674005988 / 8010700500<br/>
+            <strong>Email:</strong> admissions@iemcal.com
+          </p>
+        </div>
       </div>
-      <div>
-        <span>&copy; 2026 IEM Admissions Directorate. MEAN Stack Production Build.</span>
+
+      <div style="border-top: 1px solid #13395b; padding-top: 20px; display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; flex-wrap: wrap; gap: 12px; color: #94a3b8;">
+        <div>
+          <span>&copy; 2026 Institute of Engineering & Management (IEM), Kolkata. All Rights Reserved.</span>
+        </div>
+        <div style="display:flex; gap:16px;">
+          <span>Approved by AICTE</span>
+          <span>Affiliated to MAKAUT</span>
+          <span style="color: #fde047; font-weight:700;">NAAC Accredited 'A' Grade</span>
+        </div>
       </div>
     </div>
   </footer>

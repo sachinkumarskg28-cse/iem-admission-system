@@ -13,6 +13,8 @@ class InMemoryDB {
     this.notifications = [];
     this.auditLogs = [];
     this.admissionCycles = [];
+    this.supportTickets = [];
+    this.contactInquiries = [];
     this.initDefaultData();
   }
 
@@ -107,6 +109,42 @@ class InMemoryDB {
         isActive: true,
         isEmailVerified: true,
         createdAt: new Date('2026-02-10'),
+      },
+      {
+        _id: 'usr-superadmin-1',
+        name: 'Dr. Satyajit Chakrabarti (Director)',
+        email: 'superadmin@iem.edu.in',
+        password: defaultPasswordHash,
+        role: 'super_admin',
+        phone: '+91 9830099999',
+        department: 'Executive Directorate',
+        isActive: true,
+        isEmailVerified: true,
+        createdAt: new Date('2026-01-01'),
+      },
+      {
+        _id: 'usr-fac-1',
+        name: 'Prof. Subhasish Bhattacharya',
+        email: 'faculty.cse@iem.edu.in',
+        password: bcrypt.hashSync('Faculty@123', 10),
+        role: 'faculty',
+        phone: '+91 9831155667',
+        department: 'Department of Computer Science & Engineering',
+        isActive: true,
+        isEmailVerified: true,
+        createdAt: new Date('2026-01-10'),
+      },
+      {
+        _id: 'usr-acc-1',
+        name: 'Mr. R. K. Mukherjee',
+        email: 'accounts@iem.edu.in',
+        password: bcrypt.hashSync('Accounts@123', 10),
+        role: 'accounts',
+        phone: '+91 9832266778',
+        department: 'Finance & Accounts Directorate',
+        isActive: true,
+        isEmailVerified: true,
+        createdAt: new Date('2026-01-10'),
       },
     ];
 
@@ -654,6 +692,73 @@ class InMemoryDB {
         module: 'COURSE',
         details: { courseCode: 'BTECH-CSE', seats: 240 },
         createdAt: new Date('2026-01-05T09:00:00Z'),
+      },
+    ];
+
+    // 10. Support Tickets
+    this.supportTickets = [
+      {
+        _id: 'tkt-1',
+        ticketNumber: 'TKT-2026-1001',
+        user: 'usr-std-1',
+        applicantName: 'Rahul Roy',
+        applicantEmail: 'student.rahul@gmail.com',
+        applicationNumber: 'IEM-2026-881023',
+        category: 'DOCUMENT_VERIFICATION',
+        subject: 'Query regarding Class 12 migration certificate submission deadline',
+        description: 'Sir, I have uploaded the internet copy of my marksheet. By when do I need to submit the original migration certificate?',
+        status: 'RESOLVED',
+        priority: 'MEDIUM',
+        responses: [
+          {
+            responderName: 'Dr. Arindam Mukherjee (Admission Officer)',
+            responderRole: 'officer',
+            message: 'Original migration certificate can be submitted physically on the day of physical reporting at the Salt Lake campus.',
+            createdAt: new Date('2026-02-16T11:00:00Z'),
+          },
+        ],
+        createdAt: new Date('2026-02-15T15:00:00Z'),
+      },
+      {
+        _id: 'tkt-2',
+        ticketNumber: 'TKT-2026-1002',
+        user: 'usr-std-2',
+        applicantName: 'Priya Sen',
+        applicantEmail: 'student.priya@gmail.com',
+        applicationNumber: 'IEM-2026-912044',
+        category: 'PAYMENT_FEE',
+        subject: 'Confirmation regarding ₹2,000 application fee e-receipt',
+        description: 'Payment was deducted via UPI and shows successful in bank statement. Kindly confirm if transaction is credited.',
+        status: 'OPEN',
+        priority: 'HIGH',
+        responses: [],
+        createdAt: new Date('2026-02-19T10:30:00Z'),
+      },
+    ];
+
+    // 11. Contact Inquiries
+    this.contactInquiries = [
+      {
+        _id: 'inq-1',
+        name: 'Sourav Ganguly',
+        email: 'sourav.g@gmail.com',
+        phone: '+91 9830112233',
+        courseInterested: 'B.Tech in Computer Science & Engineering',
+        subject: 'Direct Admission & WBJEE Cutoff rank for CSE',
+        message: 'Kindly provide the opening and closing WBJEE rank for IEM Salt Lake CSE branch under General category.',
+        status: 'NEW',
+        createdAt: new Date('2026-02-20T14:10:00Z'),
+      },
+      {
+        _id: 'inq-2',
+        name: 'Megha Majumdar',
+        email: 'megha.m@yahoo.com',
+        phone: '+91 9831998877',
+        courseInterested: 'Master of Business Administration (MBA)',
+        subject: 'Hostel facilities & MAT cutoff',
+        message: 'Are on-campus hostel facilities available for female MBA students at the IEM Management house?',
+        status: 'CONTACTED',
+        createdAt: new Date('2026-02-21T09:20:00Z'),
       },
     ];
 

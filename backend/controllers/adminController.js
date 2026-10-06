@@ -222,3 +222,177 @@ exports.getAuditLogs = async (req, res, next) => {
     next(error);
   }
 };
+
+// ==================== DATABASE ACCESS PANEL ====================
+
+// @desc    Get all database collections summary
+// @route   GET /api/admin/database/collections
+// @access  Private (Admin, Super Admin)
+exports.getDatabaseCollections = async (req, res, next) => {
+  try {
+    const collections = await dataService.getDatabaseCollectionsSummary();
+    res.status(200).json({
+      success: true,
+      collections,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get records from collection with search & filter
+// @route   GET /api/admin/database/:collection
+// @access  Private (Admin, Super Admin)
+exports.getDatabaseRecords = async (req, res, next) => {
+  try {
+    const { collection } = req.params;
+    const { search = '' } = req.query;
+    const records = await dataService.getCollectionRecords(collection, search);
+
+    res.status(200).json({
+      success: true,
+      collection,
+      count: records.length,
+      records,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Create a record in collection
+// @route   POST /api/admin/database/:collection
+// @access  Private (Admin, Super Admin)
+exports.createDatabaseRecord = async (req, res, next) => {
+  try {
+    const { collection } = req.params;
+    const created = await dataService.createCollectionRecord(collection, req.body);
+
+    await recordAudit(req, {
+      action: 'DB_RECORD_CREATED',
+      module: 'DATABASE_PANEL',
+      details: { collection, recordId: created._id },
+    });
+
+    res.status(201).json({
+      success: true,
+      message: `Record created successfully in collection '${collection}'.`,
+      record: created,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Update a record in collection
+// @route   PUT /api/admin/database/:collection/:id
+// @access  Private (Admin, Super Admin)
+exports.updateDatabaseRecord = async (req, res, next) => {
+  try {
+    const { collection, id } = req.params;
+    const updated = await dataService.updateCollectionRecord(collection, id, req.body);
+    if (!updated) {
+      return res.status(404).json({ success: false, message: 'Record not found in collection.' });
+    }
+
+    await recordAudit(req, {
+      action: 'DB_RECORD_UPDATED',
+      module: 'DATABASE_PANEL',
+      details: { collection, recordId: id },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: `Record updated successfully in collection '${collection}'.`,
+      record: updated,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Delete a record from collection
+// @route   DELETE /api/admin/database/:collection/:id
+// @access  Private (Admin, Super Admin)
+exports.deleteDatabaseRecord = async (req, res, next) => {
+  try {
+    const { collection, id } = req.params;
+    const deleted = await dataService.deleteCollectionRecord(collection, id);
+    if (!deleted) {
+      return res.status(404).json({ success: false, message: 'Record not found or could not be deleted.' });
+    }
+
+    await recordAudit(req, {
+      action: 'DB_RECORD_DELETED',
+      module: 'DATABASE_PANEL',
+      details: { collection, recordId: id },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: `Record ${id} removed successfully from collection '${collection}'.`,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Export collection records as CSV
+// @route   GET /api/admin/database/:collection/export
+// @access  Private (Admin, Super Admin)
+exports.exportDatabaseRecords = async (req, res, next) => {
+  try {
+    const { collection } = req.params;
+    const records = await dataService.getCollectionRecords(collection);
+
+    if (!records || records.length === 0) {
+      return res.status(200).send('No records found');
+    }
+
+    // Convert to CSV
+    const sample = records[0];
+    const headers = Object.keys(sample).filter((k) => typeof sample[k] !== 'object' || sample[k] instanceof Date);
+    
+    let csv = headers.join(',') + '\n';
+    records.forEach((row) => {
+      const line = headers
+        .map((h) => {
+          let val = row[h];
+          if (val instanceof Date) val = val.toISOString();
+          if (typeof val === 'string') val = `"${val.replace(/"/g, '""')}"`;
+          return val !== undefined && val !== null ? val : '';
+        })
+        .join(',');
+      csv += line + '\n';
+    });
+
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="iem_${collection}_export_${Date.now()}.csv"`);
+    res.status(200).send(csv);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Accounts financial summary
+// @route   GET /api/admin/accounts-summary
+// @access  Private (Admin, Super Admin, Accounts)
+exports.getAccountsSummary = async (req, res, next) => {
+  try {
+    const metrics = await dataService.getAdminDashboardMetrics();
+    const payments = await dataService.getAllPayments();
+
+    res.status(200).json({
+      success: true,
+      metrics: {
+        totalRevenue: metrics.totalRevenue,
+        pendingRevenue: metrics.pendingRevenue,
+        successfulTransactions: metrics.successfulTransactions,
+        paymentMethodBreakdown: metrics.paymentMethodBreakdown,
+      },
+      recentPayments: payments.slice(0, 15),
+    });
+  } catch (error) {
+    next(error);
+  }
+};

@@ -72,6 +72,39 @@ const seedData = async () => {
       isActive: true,
     });
 
+    // Super Admin (Director)
+    await User.create({
+      name: 'Dr. Satyajit Chakrabarti (Director)',
+      email: 'superadmin@iem.edu.in',
+      password: 'Admin@123',
+      role: 'super_admin',
+      phone: '+91 9830099999',
+      department: 'Executive Directorate',
+      isActive: true,
+    });
+
+    // Faculty
+    await User.create({
+      name: 'Prof. Subhasish Bhattacharya',
+      email: 'faculty.cse@iem.edu.in',
+      password: 'Faculty@123',
+      role: 'faculty',
+      phone: '+91 9831155667',
+      department: 'Department of Computer Science & Engineering',
+      isActive: true,
+    });
+
+    // Accounts Officer
+    await User.create({
+      name: 'Mr. R. K. Mukherjee',
+      email: 'accounts@iem.edu.in',
+      password: 'Accounts@123',
+      role: 'accounts',
+      phone: '+91 9832266778',
+      department: 'Finance & Accounts Directorate',
+      isActive: true,
+    });
+
     // Student Users
     const studentUser1 = await User.create({
       name: 'Rahul Roy',

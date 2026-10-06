@@ -13,6 +13,8 @@ const Payment = require('../models/Payment');
 const Notification = require('../models/Notification');
 const AuditLog = require('../models/AuditLog');
 const AdmissionCycle = require('../models/AdmissionCycle');
+const Ticket = require('../models/Ticket');
+const ContactInquiry = require('../models/ContactInquiry');
 
 const isMongoConnected = () => {
   return mongoose.connection.readyState === 1;
@@ -474,43 +476,278 @@ exports.getAuditLogs = async (moduleFilter = null) => {
   return logs;
 };
 
-// ==================== ADMIN METRICS ====================
+// ==================== ADMIN METRICS & REVENUE ====================
 exports.getAdminDashboardMetrics = async () => {
-  if (isMongoConnected()) {
-    const totalApplications = await Application.countDocuments();
-    const approvedApplications = await Application.countDocuments({ status: { $in: ['APPROVED', 'ADMITTED'] } });
-    const rejectedApplications = await Application.countDocuments({ status: 'REJECTED' });
-    const pendingApplications = await Application.countDocuments({ status: { $in: ['SUBMITTED', 'UNDER_REVIEW', 'DOCUMENTS_VERIFIED'] } });
-    const draftApplications = await Application.countDocuments({ status: 'DRAFT' });
-    const totalStudents = await User.countDocuments({ role: 'student' });
-    const totalOfficers = await User.countDocuments({ role: 'officer' });
-    const totalCourses = await Course.countDocuments({ isActive: true });
+  const apps = isMongoConnected() ? await Application.find().populate('course') : memoryDB.applications;
+  const courses = isMongoConnected() ? await Course.find() : memoryDB.courses;
+  const users = isMongoConnected() ? await User.find() : memoryDB.users;
+  const payments = isMongoConnected() ? await Payment.find() : memoryDB.payments;
 
-    return {
-      totalApplications,
-      approvedApplications,
-      rejectedApplications,
-      pendingApplications,
-      draftApplications,
-      totalStudents,
-      totalOfficers,
-      totalCourses,
-      totalRevenue: totalApplications * 2000,
-    };
+  const totalApplications = apps.length;
+  const approvedApplications = apps.filter((a) => ['APPROVED', 'ADMITTED', 'SEAT_ALLOCATED'].includes(a.status)).length;
+  const rejectedApplications = apps.filter((a) => a.status === 'REJECTED').length;
+  const pendingApplications = apps.filter((a) => ['SUBMITTED', 'UNDER_REVIEW', 'DOCUMENTS_VERIFIED'].includes(a.status)).length;
+  const draftApplications = apps.filter((a) => a.status === 'DRAFT').length;
+
+  const totalStudents = users.filter((u) => u.role === 'student').length;
+  const totalOfficers = users.filter((u) => ['officer', 'admission_officer'].includes(u.role)).length;
+  const totalFaculty = users.filter((u) => u.role === 'faculty').length;
+  const totalCourses = courses.filter((c) => c.isActive).length;
+
+  const totalSeats = courses.reduce((acc, c) => acc + (c.totalSeats || 0), 0);
+  const availableSeats = courses.reduce((acc, c) => acc + (c.availableSeats || 0), 0);
+  const allocatedSeats = totalSeats - availableSeats;
+
+  // Department Statistics
+  const deptMap = {};
+  courses.forEach((c) => {
+    const dept = c.department || 'Other';
+    if (!deptMap[dept]) {
+      deptMap[dept] = { department: dept, totalSeats: 0, availableSeats: 0, applicationCount: 0, approvedCount: 0 };
+    }
+    deptMap[dept].totalSeats += c.totalSeats || 0;
+    deptMap[dept].availableSeats += c.availableSeats || 0;
+  });
+
+  apps.forEach((a) => {
+    const courseObj = courses.find((c) => c._id?.toString() === (a.course?._id || a.course)?.toString());
+    if (courseObj && courseObj.department) {
+      const dept = courseObj.department;
+      if (deptMap[dept]) {
+        deptMap[dept].applicationCount++;
+        if (['APPROVED', 'ADMITTED'].includes(a.status)) deptMap[dept].approvedCount++;
+      }
+    }
+  });
+
+  // Revenue Analytics
+  const successfulPayments = payments.filter((p) => p.status === 'SUCCESS');
+  const totalRevenue = successfulPayments.reduce((acc, p) => acc + (p.amount || 0), 0);
+  const pendingRevenue = (totalApplications - successfulPayments.length) * 2000;
+
+  const paymentMethodBreakdown = {
+    UPI: successfulPayments.filter((p) => p.paymentMethod === 'UPI').length,
+    CREDIT_CARD: successfulPayments.filter((p) => p.paymentMethod === 'CREDIT_CARD').length,
+    DEBIT_CARD: successfulPayments.filter((p) => p.paymentMethod === 'DEBIT_CARD').length,
+    NET_BANKING: successfulPayments.filter((p) => p.paymentMethod === 'NET_BANKING').length,
+    RAZORPAY: successfulPayments.filter((p) => p.paymentMethod === 'RAZORPAY').length,
+  };
+
+  return {
+    totalApplications,
+    approvedApplications,
+    rejectedApplications,
+    pendingApplications,
+    draftApplications,
+    totalStudents,
+    totalOfficers,
+    totalFaculty,
+    totalCourses,
+    totalSeats,
+    availableSeats,
+    allocatedSeats,
+    totalRevenue,
+    pendingRevenue,
+    successfulTransactions: successfulPayments.length,
+    departmentStats: Object.values(deptMap),
+    paymentMethodBreakdown,
+  };
+};
+
+// ==================== HELPDESK & SUPPORT TICKETS ====================
+exports.createTicket = async (ticketData) => {
+  const ticketNumber = `TKT-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+  if (isMongoConnected()) {
+    const ticket = new Ticket({ ...ticketData, ticketNumber });
+    return await ticket.save();
+  }
+  const newTicket = {
+    _id: `tkt-${Date.now()}`,
+    ticketNumber,
+    ...ticketData,
+    status: 'OPEN',
+    responses: [],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+  memoryDB.supportTickets.unshift(newTicket);
+  return newTicket;
+};
+
+exports.getTickets = async (filter = {}) => {
+  if (isMongoConnected()) {
+    return await Ticket.find(filter).sort({ createdAt: -1 });
+  }
+  let list = [...memoryDB.supportTickets];
+  if (filter.user) {
+    list = list.filter((t) => (t.user?._id || t.user)?.toString() === filter.user.toString());
+  }
+  if (filter.status) {
+    list = list.filter((t) => t.status === filter.status);
+  }
+  return list;
+};
+
+exports.getTicketById = async (id) => {
+  if (isMongoConnected()) {
+    return await Ticket.findById(id);
+  }
+  return memoryDB.supportTickets.find((t) => t._id?.toString() === id?.toString()) || null;
+};
+
+exports.updateTicket = async (id, updateData) => {
+  if (isMongoConnected()) {
+    return await Ticket.findByIdAndUpdate(id, updateData, { new: true });
+  }
+  const idx = memoryDB.supportTickets.findIndex((t) => t._id?.toString() === id?.toString());
+  if (idx !== -1) {
+    memoryDB.supportTickets[idx] = { ...memoryDB.supportTickets[idx], ...updateData, updatedAt: new Date() };
+    return memoryDB.supportTickets[idx];
+  }
+  return null;
+};
+
+// ==================== CONTACT INQUIRIES ====================
+exports.createContactInquiry = async (data) => {
+  if (isMongoConnected()) {
+    const inq = new ContactInquiry(data);
+    return await inq.save();
+  }
+  const newInq = {
+    _id: `inq-${Date.now()}`,
+    ...data,
+    status: 'NEW',
+    createdAt: new Date(),
+  };
+  memoryDB.contactInquiries.unshift(newInq);
+  return newInq;
+};
+
+exports.getContactInquiries = async () => {
+  if (isMongoConnected()) {
+    return await ContactInquiry.find().sort({ createdAt: -1 });
+  }
+  return [...memoryDB.contactInquiries];
+};
+
+exports.updateContactInquiry = async (id, data) => {
+  if (isMongoConnected()) {
+    return await ContactInquiry.findByIdAndUpdate(id, data, { new: true });
+  }
+  const idx = memoryDB.contactInquiries.findIndex((i) => i._id?.toString() === id?.toString());
+  if (idx !== -1) {
+    memoryDB.contactInquiries[idx] = { ...memoryDB.contactInquiries[idx], ...data };
+    return memoryDB.contactInquiries[idx];
+  }
+  return null;
+};
+
+// ==================== PAYMENTS LIST ====================
+exports.getAllPayments = async () => {
+  if (isMongoConnected()) {
+    return await Payment.find().sort({ createdAt: -1 }).populate('user', 'name email');
+  }
+  return [...memoryDB.payments].map((p) => {
+    const userObj = memoryDB.users.find((u) => u._id === p.user);
+    return { ...p, userName: userObj ? userObj.name : 'Candidate', userEmail: userObj ? userObj.email : '' };
+  });
+};
+
+exports.getPaymentsByUserId = async (userId) => {
+  if (isMongoConnected()) {
+    return await Payment.find({ user: userId }).sort({ createdAt: -1 });
+  }
+  return memoryDB.payments.filter((p) => (p.user?._id || p.user)?.toString() === userId?.toString());
+};
+
+// ==================== ADMIN DATABASE ACCESS PANEL ====================
+exports.getDatabaseCollectionsSummary = async () => {
+  return [
+    { name: 'users', label: 'Users & Credentials', count: memoryDB.users.length },
+    { name: 'students', label: 'Student Profiles', count: memoryDB.students.length },
+    { name: 'courses', label: 'Courses & Seat Matrix', count: memoryDB.courses.length },
+    { name: 'applications', label: 'Admission Applications', count: memoryDB.applications.length },
+    { name: 'payments', label: 'Fee Transactions', count: memoryDB.payments.length },
+    { name: 'documents', label: 'Uploaded Documents', count: memoryDB.documents.length },
+    { name: 'tickets', label: 'Helpdesk Tickets', count: memoryDB.supportTickets.length },
+    { name: 'contacts', label: 'Contact Inquiries', count: memoryDB.contactInquiries.length },
+    { name: 'auditLogs', label: 'System Audit Logs', count: memoryDB.auditLogs.length },
+  ];
+};
+
+exports.getCollectionRecords = async (collectionName, search = '') => {
+  const map = {
+    users: memoryDB.users.map((u) => { const { password, ...safe } = u; return safe; }),
+    students: memoryDB.students,
+    courses: memoryDB.courses,
+    applications: memoryDB.applications,
+    payments: memoryDB.payments,
+    documents: memoryDB.documents,
+    tickets: memoryDB.supportTickets,
+    contacts: memoryDB.contactInquiries,
+    auditlogs: memoryDB.auditLogs,
+  };
+
+  const key = collectionName.toLowerCase();
+  let records = map[key] || [];
+
+  if (search) {
+    const s = search.toLowerCase();
+    records = records.filter((r) => JSON.stringify(r).toLowerCase().includes(s));
   }
 
-  const apps = memoryDB.applications;
-  return {
-    totalApplications: apps.length,
-    approvedApplications: apps.filter((a) => a.status === 'APPROVED' || a.status === 'ADMITTED').length,
-    rejectedApplications: apps.filter((a) => a.status === 'REJECTED').length,
-    pendingApplications: apps.filter((a) => ['SUBMITTED', 'UNDER_REVIEW', 'DOCUMENTS_VERIFIED'].includes(a.status)).length,
-    draftApplications: apps.filter((a) => a.status === 'DRAFT').length,
-    totalStudents: memoryDB.users.filter((u) => u.role === 'student').length,
-    totalOfficers: memoryDB.users.filter((u) => u.role === 'officer').length,
-    totalCourses: memoryDB.courses.filter((c) => c.isActive).length,
-    totalRevenue: apps.filter((a) => a.isFeePaid).length * 2000,
-  };
+  return records;
+};
+
+exports.createCollectionRecord = async (collectionName, recordData) => {
+  const key = collectionName.toLowerCase();
+  const id = `rec-${Date.now()}`;
+  const newRec = { _id: id, ...recordData, createdAt: new Date() };
+
+  if (key === 'users') {
+    if (recordData.password) recordData.password = bcrypt.hashSync(recordData.password, 10);
+    memoryDB.users.push(newRec);
+  } else if (key === 'courses') {
+    memoryDB.courses.push(newRec);
+  } else if (key === 'tickets') {
+    memoryDB.supportTickets.unshift(newRec);
+  } else if (key === 'contacts') {
+    memoryDB.contactInquiries.unshift(newRec);
+  } else if (key === 'payments') {
+    memoryDB.payments.unshift(newRec);
+  } else {
+    if (memoryDB[key] && Array.isArray(memoryDB[key])) {
+      memoryDB[key].unshift(newRec);
+    }
+  }
+
+  return newRec;
+};
+
+exports.updateCollectionRecord = async (collectionName, id, updateData) => {
+  const key = collectionName.toLowerCase();
+  const arr = memoryDB[key] || (key === 'tickets' ? memoryDB.supportTickets : key === 'contacts' ? memoryDB.contactInquiries : null);
+  if (!arr) return null;
+
+  const idx = arr.findIndex((r) => r._id?.toString() === id.toString());
+  if (idx !== -1) {
+    arr[idx] = { ...arr[idx], ...updateData, updatedAt: new Date() };
+    return arr[idx];
+  }
+  return null;
+};
+
+exports.deleteCollectionRecord = async (collectionName, id) => {
+  const key = collectionName.toLowerCase();
+  const arr = memoryDB[key] || (key === 'tickets' ? memoryDB.supportTickets : key === 'contacts' ? memoryDB.contactInquiries : null);
+  if (!arr) return false;
+
+  const idx = arr.findIndex((r) => r._id?.toString() === id.toString());
+  if (idx !== -1) {
+    arr.splice(idx, 1);
+    return true;
+  }
+  return false;
 };
 
 module.exports = exports;

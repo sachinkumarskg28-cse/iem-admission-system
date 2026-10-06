@@ -21,6 +21,8 @@ const adminRoutes = require('./routes/adminRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const documentRoutes = require('./routes/documentRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
+const helpdeskRoutes = require('./routes/helpdeskRoutes');
+const { apiLimiter, authLimiter } = require('./middleware/rateLimitMiddleware');
 
 // Initialize app
 const app = express();
@@ -78,6 +80,10 @@ app.get('/api', (req, res) => {
   });
 });
 
+// Apply rate limiting middleware
+app.use('/api', apiLimiter);
+app.use('/api/auth', authLimiter);
+
 // Mount API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/student', studentRoutes);
@@ -88,6 +94,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/documents', documentRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/helpdesk', helpdeskRoutes);
 
 // Fallback for API 404
 app.all('/api/*', (req, res) => {

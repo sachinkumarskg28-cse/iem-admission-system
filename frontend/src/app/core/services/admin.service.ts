@@ -44,4 +44,29 @@ export class AdminService {
     const url = module ? `${this.apiUrl}/audit-logs?module=${module}` : `${this.apiUrl}/audit-logs`;
     return this.http.get(url);
   }
+
+  getDatabaseCollections(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/database/collections`);
+  }
+
+  getDatabaseRecords(collection: string, search?: string): Observable<any> {
+    const url = search ? `${this.apiUrl}/database/${collection}?search=${encodeURIComponent(search)}` : `${this.apiUrl}/database/${collection}`;
+    return this.http.get(url);
+  }
+
+  createDatabaseRecord(collection: string, data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/database/${collection}`, data);
+  }
+
+  updateDatabaseRecord(collection: string, id: string, data: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/database/${collection}/${id}`, data);
+  }
+
+  deleteDatabaseRecord(collection: string, id: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/database/${collection}/${id}`);
+  }
+
+  getAccountsSummary(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/accounts-summary`);
+  }
 }

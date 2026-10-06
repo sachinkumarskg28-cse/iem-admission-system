@@ -186,11 +186,11 @@ async function renderView(params = {}) {
       <!-- Hero Banner -->
       <section style="background: linear-gradient(135deg, #072238 0%, #0b3b60 60%, #174d75 100%); color: #fff; padding: 70px 20px 80px; text-align: center; position: relative;">
         <div class="container" style="max-width: 960px;">
-          <div style="display: flex; justify-content: center; align-items: center; gap: 12px; margin-bottom: 18px;">
-            <img src="/assets/iem-logo.png" alt="IEM Crest" style="height: 64px; background: rgba(255,255,255,0.9); padding: 5px; border-radius: 8px;" />
+          <div style="display: inline-flex; align-items: center; gap: 14px; background: #ffffff; padding: 8px 18px; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.25); margin-bottom: 24px;">
+            <img src="/assets/iem-logo.png" alt="IEM Crest" style="height: 54px; width: auto; object-fit: contain;" />
             <div style="text-align: left;">
-              <span style="font-size: 0.85rem; font-weight: 700; color: #fde047; letter-spacing: 1px; display: block;">INSTITUTE OF ENGINEERING & MANAGEMENT, KOLKATA</span>
-              <span style="font-size: 0.75rem; color: #cbd5e1;">NAAC 'A' Grade &bull; NBA Accredited &bull; MAKAUT Affiliated</span>
+              <span style="font-size: 0.95rem; font-weight: 800; color: #0b3b60; display: block; letter-spacing: -0.2px;">INSTITUTE OF ENGINEERING & MANAGEMENT</span>
+              <span style="font-size: 0.74rem; color: #c9182b; font-weight: 700;">NAAC 'A' Grade &bull; NBA Accredited &bull; MAKAUT Affiliated</span>
             </div>
           </div>
           
